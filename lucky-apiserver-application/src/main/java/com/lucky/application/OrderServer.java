@@ -1,0 +1,355 @@
+package com.lucky.application;
+
+import com.lucky.domain.*;
+import com.lucky.domain.config.RedissionConfig;
+import com.lucky.domain.entity.*;
+import com.lucky.domain.exception.BusinessException;
+import com.lucky.domain.valueobject.BaseDataPage;
+import com.lucky.domain.valueobject.Inventory;
+import com.lucky.domain.valueobject.Order;
+import com.lucky.domain.valueobject.SuccessProducts;
+import org.redisson.api.RLock;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Component
+public class OrderServer {
+    private final OrderService orderService;
+    private final PrizeInfoService prizeInfoService;
+    private final GradeService gradeService;
+    private final SeriesTopicService seriesTopicService;
+    private final WechatUserService wechatUserService;
+    private final SessionInfoService sessionInfoService;
+    private final RedissionConfig redissionConfig;
+    private final static String DEDUCTION = "DEDUCTION:";
+
+    public OrderServer(OrderService orderService,
+                       PrizeInfoService prizeInfoService,
+                       GradeService gradeService,
+                       SeriesTopicService seriesTopicService,
+                       WechatUserService wechatUserService, SessionInfoService sessionInfoService, RedissionConfig redissionConfig) {
+        this.orderService = orderService;
+        this.prizeInfoService = prizeInfoService;
+        this.gradeService = gradeService;
+        this.seriesTopicService = seriesTopicService;
+        this.wechatUserService = wechatUserService;
+        this.sessionInfoService = sessionInfoService;
+        this.redissionConfig = redissionConfig;
+    }
+
+
+    /**
+     * 列表
+     */
+    public List<OrderEntity> list(OrderEntity entity) {
+        return orderService.list(entity);
+    }
+
+
+    /**
+     * 修改订单状态
+     */
+    public void updateStatus(Long id, Integer status) {
+
+        orderService.updateStatus(id, status);
+    }
+
+    public BaseDataPage<Order> page(OrderEntity entity, Integer page, Integer size) {
+
+        BaseDataPage<OrderEntity> orderEntityPage = orderService.page(entity, page, size);
+
+        var dataList = orderEntityPage.getDataList();
+
+        if (CollectionUtils.isEmpty(dataList))
+            return new BaseDataPage<>(0l);
+        //主题id
+        var topicIds = dataList.stream()
+                .map(OrderEntity::getTopicId)
+                .collect(Collectors.toList());
+
+        //商品id
+        var productIds = dataList.stream()
+                .map(OrderEntity::getProductId)
+                .collect(Collectors.toList());
+
+        var wechatUserIds = dataList.stream()
+                .map(OrderEntity::getWechatUserId)
+                .collect(Collectors.toList());
+
+        var seriesTopicByName = seriesTopicService.findByIds(topicIds)
+                .stream()
+                .collect(Collectors.toMap(SeriesTopicEntity::getId, SeriesTopicEntity::getName));
+
+        var products = prizeInfoService.findByIds(productIds);
+
+        var gradeIds = products.stream()
+                .map(PrizeInfoEntity::getGradeId)
+                .collect(Collectors.toList());
+
+        var prizeInfoMap = products.stream()
+                .collect(Collectors.toMap(PrizeInfoEntity::getId, Function.identity()));
+
+        var gradeEntityByName = gradeService.findByIds(gradeIds)
+                .stream()
+                .collect(Collectors.toMap(GradeEntity::getId, GradeEntity::getName));
+
+        List<WechatUserEntity> wechatUsers = wechatUserService.getByIds(wechatUserIds);
+        var wechatUserMap = wechatUsers.stream()
+                .collect(Collectors.toMap(WechatUserEntity::getId, WechatUserEntity::getName));
+
+
+        return BaseDataPage.newInstance(
+                orderEntityPage.getTotal(),
+                orderEntityPage.getPages(),
+                dataList.stream()
+                        .map(orderEntity -> {
+                            var prizeInfoEntity = prizeInfoMap.get(orderEntity.getProductId());
+                            return Order
+                                    .builder()
+                                    .id(orderEntity.getId())
+                                    .finishTime(orderEntity.getFinishTime())
+                                    .createTime(orderEntity.getCreateTime())
+                                    .sendTime(orderEntity.getSendTime())
+                                    .status(orderEntity.getStatus())
+                                    .wechatName(wechatUserMap.get(orderEntity.getWechatUserId()))
+                                    .topicName(seriesTopicByName.get(orderEntity.getTopicId()))
+                                    .productName(prizeInfoEntity.getPrizeName())
+                                    .productUrl(prizeInfoEntity.getPrizeUrl())
+                                    .sessionName(gradeEntityByName.get(prizeInfoEntity.getGradeId()))
+                                    .build();
+                        })
+                        .collect(Collectors.toList()));
+
+    }
+
+    public PayOrderEntity getByPrizeInfo(PayOrderEntity payOrderEntity) {
+        RLock lock = redissionConfig.redissonClient().getLock(DEDUCTION + payOrderEntity.getId());
+        lock.lock();
+        try {
+            //获取主题下的商品
+            var prizeInfoEntities = prizeInfoService.findByTopicId(payOrderEntity.getTopicId());
+
+            var gradeIds = prizeInfoEntities.stream()
+                    .map(PrizeInfoEntity::getGradeId)
+                    .collect(Collectors.toList());
+
+            List<GradeEntity> gradeEntities = gradeService.findByIds(gradeIds);
+
+            var gradeEntityMap = gradeEntities.stream()
+                    .collect(Collectors.toMap(GradeEntity::getId, Function.identity()));
+
+
+            var sessionInfoEntity = sessionInfoService.findById(payOrderEntity.getSessionId());
+
+
+            var prizeInfoMap = prizeInfoEntities.stream()
+                    .collect(Collectors.groupingBy(PrizeInfoEntity::getType));
+
+
+            //获取隐藏级的概率
+            var hide = prizeInfoMap.get(1);
+
+            //获取普通级的概率
+            var common = prizeInfoMap.get(2);
+            //获取总库存
+            var commonInventory = common
+                    .stream()
+                    .map(PrizeInfoEntity::getInventory)
+                    .reduce(0, Integer::sum);
+
+            if (commonInventory < payOrderEntity.getTimes())
+                throw BusinessException.newInstance("次数小于库存");
+
+            var prizeInventory = sessionInfoEntity.getPrizeInventory();
+            //抽中的奖品id
+
+            var prizeIds = new ArrayList<Long>();
+
+
+            for (Integer i = 0; i < payOrderEntity.getTimes(); i++) {
+
+                var prizeId = this.getaPrizeId(hide, gradeEntityMap, prizeInventory, commonInventory);
+
+                prizeInventory = prizeInventory
+                        .stream()
+                        .map(entry -> {
+                            if (Objects.equals(entry.getPrizeId(), prizeId))
+                                entry.setInventory(entry.getInventory() - 1);
+                            return entry;
+                        })
+                        .collect(Collectors.toList());
+
+                prizeIds.add(prizeId);
+            }
+            sessionInfoEntity.setPrizeInventory(prizeInventory);
+
+            sessionInfoService.saveOrUpdate(sessionInfoEntity);
+
+            orderService.saveBatch(prizeIds,
+                    payOrderEntity.getTopicId(),
+                    payOrderEntity.getSessionId(),
+                    payOrderEntity.getWechatUserId());
+
+            payOrderEntity.setPrizeId(prizeIds);
+
+
+            return payOrderEntity;
+
+        } finally {
+
+            if (lock.isLocked())
+                lock.unlock();
+
+        }
+
+
+    }
+
+    /**
+     * 根据奖品id获取奖品
+     */
+    public List<SuccessProducts> getPrizeInfoByNum(List<Long> prizeIds) {
+
+        var prizeInfoEntityList = prizeInfoService.findByIds(prizeIds);
+
+        var gradeIds = prizeInfoEntityList.stream()
+                .map(PrizeInfoEntity::getGradeId)
+                .collect(Collectors.toList());
+
+        var gradeGroupName = gradeService.findByIds(gradeIds)
+                .stream()
+                .collect(Collectors.toMap(GradeEntity::getId, GradeEntity::getName));
+
+        var prizeInfoEntityMap = prizeInfoEntityList
+                .stream()
+                .collect(Collectors.toMap(PrizeInfoEntity::getId, Function.identity()));
+        // 统计每个 prizeId 出现的次数
+        return prizeIds.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet()
+                .stream()
+                .map(entry -> SuccessProducts.getInstance(
+                        prizeInfoEntityMap.get(entry.getKey()),
+                        gradeGroupName.get(prizeInfoEntityMap.get(entry.getKey()).getGradeId()),
+                        entry.getValue()))
+                .collect(Collectors.toList());
+
+
+    }
+
+
+    /**
+     * @param hide
+     * @param gradeEntityMap
+     * @param prizeInventory
+     * @param commonInventory
+     * @return
+     */
+
+    private Long getaPrizeId(List<PrizeInfoEntity> hide, Map<Long, GradeEntity> gradeEntityMap, List<Inventory> prizeInventory, Integer commonInventory) {
+
+        Map<Long, BigDecimal> probability = new HashMap<>();
+
+        if (!CollectionUtils.isEmpty(hide)) {
+
+            var hideMap = hide
+                    .stream()
+                    .collect(Collectors.toMap(
+                            PrizeInfoEntity::getId,
+                            entry -> gradeEntityMap.get(entry.getGradeId()).getProbability()
+                    ));
+            probability.putAll(hideMap);
+
+
+        }
+
+        var normal = prizeInventory
+                .stream()
+                .collect(Collectors.toMap(
+                        Inventory::getPrizeId,
+                        entry -> {
+                            var inventory = entry.getInventory();
+                            if (inventory <= 0)
+                                return BigDecimal.ZERO;
+                            return BigDecimal.valueOf(inventory)
+                                    .divide(BigDecimal.valueOf(commonInventory), 3, RoundingMode.HALF_UP);
+                        }
+                ));
+        probability.putAll(normal);
+
+
+        return this.selectProduct(probability);
+
+    }
+
+
+    /**
+     * 更据概率图获取商品
+     *
+     * @param probabilityMap 商品和商品的概率
+     * @return
+     */
+    public Long selectProduct(Map<Long, BigDecimal> probabilityMap) {
+        if (probabilityMap.isEmpty()) {
+            throw new IllegalArgumentException("Probability map is empty");
+        }
+
+        // 计算总和和最大小数位数
+        BigDecimal total = BigDecimal.ZERO;
+        int maxScale = 0;
+        for (BigDecimal value : probabilityMap.values()) {
+            if (value.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("Negative probability found: " + value);
+            }
+            total = total.add(value);
+            maxScale = Math.max(maxScale, value.scale());
+        }
+
+        if (total.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Total probability must be positive");
+        }
+
+        // 缩放因子
+        BigDecimal factor = BigDecimal.TEN.pow(maxScale);
+        List<Map.Entry<Long, Long>> scaledEntries = new ArrayList<>();
+        long totalScaled = 0;
+
+        // 转换为整数权重
+        for (Map.Entry<Long, BigDecimal> entry : probabilityMap.entrySet()) {
+            BigDecimal scaledValue = entry.getValue().setScale(maxScale, RoundingMode.HALF_UP);
+            BigDecimal weightBd = scaledValue.multiply(factor);
+            try {
+                long weight = weightBd.longValueExact();
+                scaledEntries.add(new AbstractMap.SimpleEntry<>(entry.getKey(), weight));
+                totalScaled += weight;
+            } catch (ArithmeticException e) {
+                throw new IllegalArgumentException("Value " + entry.getValue() + " cannot be scaled to an exact integer.", e);
+            }
+        }
+
+        if (totalScaled <= 0) {
+            throw new IllegalArgumentException("Sum of scaled weights must be positive");
+        }
+
+        // 生成随机数
+        long random = ThreadLocalRandom.current().nextLong(totalScaled);
+
+        // 累加权重选择商品
+        long accumulated = 0;
+        for (Map.Entry<Long, Long> entry : scaledEntries) {
+            accumulated += entry.getValue();
+            if (accumulated > random) {
+                return entry.getKey();
+            }
+        }
+
+        return scaledEntries.get(scaledEntries.size() - 1).getKey(); // 理论上不会执行到这里
+    }
+}
