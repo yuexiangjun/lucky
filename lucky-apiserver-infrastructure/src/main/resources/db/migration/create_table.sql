@@ -55,6 +55,8 @@ CREATE TABLE `prize_info` (
                               `prize_name` varchar(255) DEFAULT NULL COMMENT '奖品名称',
                               `prize_url` varchar(500) DEFAULT NULL COMMENT '奖品图片',
                               `inventory` int(100) DEFAULT NULL COMMENT '库存',
+                               `price` decimal(10,2) DEFAULT NULL COMMENT '价格（多少钱一抽）',
+
                               PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 CREATE TABLE `series_topic` (

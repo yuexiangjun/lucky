@@ -15,64 +15,65 @@ import java.util.stream.Collectors;
 
 @Component
 public class GradeRepositoryImpl extends ServiceImpl<GradeMapper, GradePO> implements GradeRepository {
-	private final GradeMapper gradeMapper;
+    private final GradeMapper gradeMapper;
 
-	public GradeRepositoryImpl(GradeMapper gradeMapper) {
-		this.gradeMapper = gradeMapper;
+    public GradeRepositoryImpl(GradeMapper gradeMapper) {
+        this.gradeMapper = gradeMapper;
 
-	}
+    }
 
-	@Override
-	public Long saveOrUpdate(GradeEntity entity) {
+    @Override
+    public Long saveOrUpdate(GradeEntity entity) {
 
-		var gradePO = GradePO.getInstance(entity);
+        var gradePO = GradePO.getInstance(entity);
 
-		if (Objects.isNull(gradePO))
-			return null;
+        if (Objects.isNull(gradePO))
+            return null;
 
-		if (Objects.isNull(gradePO.getId()))
-			gradeMapper.insert(gradePO);
-		else
-			gradeMapper.updateById(gradePO);
-		return gradePO.getId();
-	}
+        if (Objects.isNull(gradePO.getId()))
+            gradeMapper.insert(gradePO);
+        else
+            gradeMapper.updateById(gradePO);
+        return gradePO.getId();
+    }
 
-	@Override
-	public List<GradeEntity> findByList(GradeEntity entity) {
-		var wrapper = Wrappers.<GradePO>lambdaQuery()
-				.eq(Objects.nonNull(entity.getStatus()), GradePO::getStatus, entity.getStatus())
-				.orderByAsc(GradePO::getSort);
+    @Override
+    public List<GradeEntity> findByList(GradeEntity entity) {
+        var wrapper = Wrappers.<GradePO>lambdaQuery()
+                .eq(Objects.nonNull(entity.getStatus()), GradePO::getStatus, entity.getStatus())
+                .eq(Objects.nonNull(entity.getType()), GradePO::getType, entity.getType())
+                .orderByAsc(GradePO::getSort);
 
-		return gradeMapper.selectList(wrapper)
-				.stream()
-				.map(GradePO::toEntity)
-				.collect(Collectors.toList());
+        return gradeMapper.selectList(wrapper)
+                .stream()
+                .map(GradePO::toEntity)
+                .collect(Collectors.toList());
 
-	}
+    }
 
-	@Override
-	public Boolean deleteById(Long id) {
-		int i = gradeMapper.deleteById(id);
-		if (i > 0)
-			return true;
-		else
-			return false;
+    @Override
+    public Boolean deleteById(Long id) {
+        int i = gradeMapper.deleteById(id);
+        if (i > 0)
+            return true;
+        else
+            return false;
 
-	}
+    }
 
-	@Override
-	public List<GradeEntity> findByIds(List<Long> gradeIds) {
+    @Override
+    public List<GradeEntity> findByIds(List<Long> gradeIds) {
 
-		if (CollectionUtils.isEmpty(gradeIds))
-			return List.of();
+        if (CollectionUtils.isEmpty(gradeIds))
+            return List.of();
 
-		var wrapper = Wrappers.<GradePO>lambdaQuery()
-				.in(GradePO::getId, gradeIds);
+        var wrapper = Wrappers.<GradePO>lambdaQuery()
+                .in(GradePO::getId, gradeIds);
 
-		return gradeMapper.selectList(wrapper)
-				.stream()
-				.map(GradePO::toEntity)
-				.collect(Collectors.toList());
+        return gradeMapper.selectList(wrapper)
+                .stream()
+                .map(GradePO::toEntity)
+                .collect(Collectors.toList());
 
-	}
+    }
 }

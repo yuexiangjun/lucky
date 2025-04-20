@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * 奖品
  */
@@ -43,4 +45,8 @@ public class PrizeInfoEntity {
      * 库存
      */
     private Integer inventory;
+    /**
+     * 单价
+     */
+    private BigDecimal price;
 }

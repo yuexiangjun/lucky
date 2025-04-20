@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
@@ -49,12 +50,17 @@ public class PrizeInfoPO {
      * 库存
      */
     private Integer inventory;
+    /**
+     * 单价
+     */
+    private BigDecimal price;
     public static PrizeInfoPO getInstance(PrizeInfoEntity entity) {
         if (Objects.isNull(entity))
             return null;
         return PrizeInfoPO.builder()
                 .id(entity.getId())
                 .type(entity.getType())
+                .price(entity.getPrice())
                 .topicId(entity.getTopicId())
                 .gradeId(entity.getGradeId())
                 .prizeName(entity.getPrizeName())
@@ -72,6 +78,7 @@ public class PrizeInfoPO {
                 .id(po.getId())
                 .type(po.getType())
                 .topicId(po.getTopicId())
+                .price(po.getPrice())
                 .gradeId(po.getGradeId())
                 .prizeName(po.getPrizeName())
                 .prizeUrl(po.getPrizeUrl())

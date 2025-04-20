@@ -103,8 +103,9 @@ public class GradeController {
 	 */
 	@GetMapping("/drop-down-box")
 	@ResponseFormat
-	public List<DropBoxVO> dropBox() {
+	public List<DropBoxVO> dropBox(@RequestParam Integer type) {
 		var entity = GradeEntity.builder()
+				.type(type)
 				.status(true)
 				.build();
 		return gradeServer.findByList(entity)

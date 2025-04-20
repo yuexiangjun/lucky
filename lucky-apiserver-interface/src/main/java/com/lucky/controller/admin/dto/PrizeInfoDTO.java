@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
@@ -47,13 +48,23 @@ public class PrizeInfoDTO {
      * 库存
      */
     private Integer inventory;
-    public static PrizeInfoEntity toEntity(PrizeInfoDTO dto){
+    /**
+     * 单价
+     */
+    private BigDecimal price;
+
+    /**
+     * @param dto
+     * @return
+     */
+    public static PrizeInfoEntity toEntity(PrizeInfoDTO dto) {
         if (Objects.isNull(dto))
             throw BusinessException.newInstance("缺少参数");
         return PrizeInfoEntity.builder()
                 .id(dto.getId())
                 .type(dto.getType())
                 .gradeId(dto.getGradeId())
+                .price(dto.getPrice())
                 .prizeName(dto.getPrizeName())
                 .prizeUrl(dto.getPrizeUrl())
                 .inventory(dto.getInventory())
