@@ -1,17 +1,18 @@
 package com.lucky.domain.valueobject;
 
+import cn.hutool.core.bean.BeanUtil;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.lucky.domain.entity.PrizeInfoEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Objects;
 
-@Data
-@Builder
+@Getter
+@Setter
+
 @AllArgsConstructor
 @NoArgsConstructor
+//@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class Inventory {
     /**
      * 奖品id
@@ -25,10 +26,7 @@ public class Inventory {
     public static Inventory getInstance(PrizeInfoEntity prizeInfoEntity) {
         if (Objects.isNull(prizeInfoEntity))
             return null;
-        return Inventory.builder()
-                .inventory(prizeInfoEntity.getInventory())
-                .prizeId(prizeInfoEntity.getId())
-                .build();
+        return BeanUtil.toBean(prizeInfoEntity, Inventory.class);
 
     }
 

@@ -55,7 +55,7 @@ public class SeriesTopicVO {
                 .price(entity.getPrice())
                 .topicColor(entity.getTopicColor())
                 .status(entity.getStatus())
-
+                .session(entity.getSession())
                 .topicUrl(entity.getTopicUrl())
                 .build();
 

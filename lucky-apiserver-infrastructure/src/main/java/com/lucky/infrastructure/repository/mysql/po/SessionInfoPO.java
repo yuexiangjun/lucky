@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.lucky.domain.entity.SessionInfoEntity;
 import com.lucky.domain.valueobject.Inventory;
+import com.lucky.infrastructure.repository.mysql.InventoryListTypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,7 +44,7 @@ public class SessionInfoPO {
     /**
      * 奖品库存
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @TableField(typeHandler = InventoryListTypeHandler.class)
     private List<Inventory> prizeInventory;
 
     public static SessionInfoPO getInstance(SessionInfoEntity entity) {

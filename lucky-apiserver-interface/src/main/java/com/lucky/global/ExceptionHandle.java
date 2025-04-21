@@ -40,7 +40,7 @@ public class ExceptionHandle {
 	@ExceptionHandler(ClassCastException.class)
 	public R handleException(HttpServletResponse response, ClassCastException throwable) {
 		this.log.error(throwable.getMessage(), throwable);
-		return R.ok();
+		return R.fail(throwable.getMessage());
 	}
 
 }

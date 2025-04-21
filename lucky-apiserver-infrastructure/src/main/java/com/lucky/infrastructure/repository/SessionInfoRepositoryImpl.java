@@ -56,7 +56,7 @@ public class SessionInfoRepositoryImpl extends ServiceImpl<SessionInfoMapper, Se
 
 	@Override
 	public List<SessionInfoEntity> findByTopicId(Long topicId) {
-		var eq = Wrappers.lambdaQuery(SessionInfoPO.class)
+		var eq = Wrappers.<SessionInfoPO>lambdaQuery()
 				.eq(SessionInfoPO::getTopicId, topicId);
 		return this.list(eq)
 				.stream()
@@ -66,7 +66,7 @@ public class SessionInfoRepositoryImpl extends ServiceImpl<SessionInfoMapper, Se
 
 	@Override
 	public Boolean deleteByTopicId(Long topicId) {
-		var eq = Wrappers.lambdaQuery(SessionInfoPO.class)
+		var eq = Wrappers.<SessionInfoPO>lambdaQuery()
 				.eq(SessionInfoPO::getTopicId, topicId);
 		return this.remove(eq);
 	}
@@ -74,7 +74,7 @@ public class SessionInfoRepositoryImpl extends ServiceImpl<SessionInfoMapper, Se
 	@Override
 	public BaseDataPage<SessionInfoEntity> findByTopicIdPage(Long topicId, Integer page, Integer size) {
 		var sessionInfoPOPage = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<SessionInfoPO>(page, size);
-		var eq = Wrappers.lambdaQuery(SessionInfoPO.class)
+		var eq = Wrappers.<SessionInfoPO>lambdaQuery()
 				.eq(SessionInfoPO::getTopicId, topicId)
 				.orderByAsc(SessionInfoPO::getSessionNumber);
 		var page1 = this.page(sessionInfoPOPage, eq);
@@ -93,7 +93,7 @@ public class SessionInfoRepositoryImpl extends ServiceImpl<SessionInfoMapper, Se
 	@Override
 	public BaseDataPage<SessionInfoEntity> findByTopicIdPageStatus(Long topicId, Integer page, Integer size) {
 		var sessionInfoPOPage = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<SessionInfoPO>(page, size);
-		var eq = Wrappers.lambdaQuery(SessionInfoPO.class)
+		var eq = Wrappers.<SessionInfoPO>lambdaQuery()
 				.eq(SessionInfoPO::getTopicId, topicId)
 				.orderByAsc(SessionInfoPO::getStatus)
 				.orderByAsc(SessionInfoPO::getSessionNumber);
