@@ -60,7 +60,7 @@ CREATE TABLE `prize_info` (
                               PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 CREATE TABLE `series_topic` (
-                                `id` int(11) NOT NULL,
+                                `id` bigint(20) NOT NULL,
                                 `name` varchar(255) DEFAULT NULL COMMENT '名称',
                                 `topic_color` varchar(255) DEFAULT NULL COMMENT '主题颜色',
                                 `session` int(100) DEFAULT NULL COMMENT '场次(一共多少场)',
@@ -79,7 +79,7 @@ CREATE TABLE `session_info` (
                                 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 CREATE TABLE `wechat_user` (
-                               `id` int(11) NOT NULL,
+                               `id` bigint(20) NOT NULL,
                                `avatar` varchar(255) DEFAULT NULL COMMENT '头像地址',
                                `openid` varchar(255) DEFAULT NULL COMMENT 'openid',
                                `name` varchar(255) DEFAULT NULL COMMENT '姓名',

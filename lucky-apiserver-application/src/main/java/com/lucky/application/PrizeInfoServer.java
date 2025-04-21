@@ -5,6 +5,8 @@ import com.lucky.domain.entity.PrizeInfoEntity;
 import com.lucky.domain.repository.PrizeInfoRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * 奖品
  */
@@ -29,5 +31,9 @@ public class PrizeInfoServer {
      */
     public Boolean deleteById(Long id) {
         return prizeInfoService.deleteById(id);
+    }
+
+    public List<PrizeInfoEntity> findByTopicId(Long topicId) {
+        return prizeInfoService.findByTopicId(topicId);
     }
 }

@@ -66,7 +66,7 @@ public class AdminUserServer {
 		if (!Objects.equals(entity.getPassword(), password)) {
 			throw BusinessException.newInstance("密码错误");
 		}
-		if (Objects.equals(entity.getEnabled(), 0)) {
+		if (!entity.getEnabled()) {
 			throw BusinessException.newInstance("账号已被禁用");
 		}
 		var tokenEntity = TokenEntity.builder()

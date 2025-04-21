@@ -1,7 +1,7 @@
-package com.lucky.controller.admin.dto;
+package com.lucky.controller.admin.vo;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.lucky.domain.entity.PrizeInfoEntity;
-import com.lucky.domain.exception.BusinessException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +17,7 @@ import java.util.Objects;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PrizeInfoDTO {
+public class PrizeInfoVO {
     /**
      * id
      */
@@ -52,23 +52,9 @@ public class PrizeInfoDTO {
      * 单价
      */
     private BigDecimal price;
-
-    /**
-     * @param dto
-     * @return
-     */
-    public static PrizeInfoEntity toEntity(PrizeInfoDTO dto) {
-        if (Objects.isNull(dto))
-            throw BusinessException.newInstance("缺少参数");
-        return PrizeInfoEntity.builder()
-                .id(dto.getId())
-                .type(dto.getType())
-                .gradeId(dto.getGradeId())
-                .topicId(dto.getTopicId())
-                .price(dto.getPrice())
-                .prizeName(dto.getPrizeName())
-                .prizeUrl(dto.getPrizeUrl())
-                .inventory(dto.getInventory())
-                .build();
+    public static  PrizeInfoVO getInstance(PrizeInfoEntity entity){
+        if(Objects.isNull(entity))
+            return null;
+        return BeanUtil.toBean(entity,PrizeInfoVO.class);
     }
 }

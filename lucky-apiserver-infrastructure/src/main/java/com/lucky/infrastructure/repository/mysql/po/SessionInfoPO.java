@@ -1,6 +1,8 @@
 package com.lucky.infrastructure.repository.mysql.po;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.lucky.domain.entity.SessionInfoEntity;
@@ -25,6 +27,7 @@ public class SessionInfoPO {
     /**
      * id
      */
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
     /**
      * 主题id

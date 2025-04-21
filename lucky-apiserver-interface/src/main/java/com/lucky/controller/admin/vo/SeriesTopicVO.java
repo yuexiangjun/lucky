@@ -42,7 +42,10 @@ public class SeriesTopicVO {
      */
     private BigDecimal price;
 
-
+    /**
+     * 是否启用
+     */
+    private Boolean status;
 
     public static SeriesTopicVO getInstance(SeriesTopicEntity entity) {
 
@@ -51,6 +54,7 @@ public class SeriesTopicVO {
                 .name(entity.getName())
                 .price(entity.getPrice())
                 .topicColor(entity.getTopicColor())
+                .status(entity.getStatus())
 
                 .topicUrl(entity.getTopicUrl())
                 .build();

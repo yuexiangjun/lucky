@@ -1,17 +1,19 @@
 package com.lucky.controller.admin;
 
 import com.lucky.application.PrizeInfoServer;
-import com.lucky.controller.admin.dto.GradeDTO;
 import com.lucky.controller.admin.dto.PrizeInfoDTO;
-import com.lucky.domain.entity.PrizeInfoEntity;
+import com.lucky.controller.admin.vo.PrizeInfoVO;
 import com.lucky.domain.exception.BusinessException;
 import com.lucky.utils.ResponseFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 奖品
+ *
  * @folder API/后台/奖品设置
  */
 @RestController
@@ -29,7 +31,7 @@ public class PrizeInfoController {
      */
     @PostMapping
     @ResponseFormat
-    public  void  save(@RequestBody PrizeInfoDTO dto) {
+    public void save(@RequestBody PrizeInfoDTO dto) {
         var entity = PrizeInfoDTO.toEntity(dto);
 
         var id = prizeInfoServer.saveOrUpdate(entity);
@@ -43,7 +45,7 @@ public class PrizeInfoController {
      */
     @PutMapping
     @ResponseFormat
-    public  void  update(@RequestBody PrizeInfoDTO dto) {
+    public void update(@RequestBody PrizeInfoDTO dto) {
         var entity = PrizeInfoDTO.toEntity(dto);
 
         if (Objects.isNull(entity.getId()))
@@ -56,12 +58,25 @@ public class PrizeInfoController {
     }
 
     /**
+     * 根据主题系列查看商品
+     */
+    @GetMapping("/list")
+    @ResponseFormat
+    public List<PrizeInfoVO> findByTopicId(@RequestParam Long topicId) {
+        var list = prizeInfoServer.findByTopicId(topicId);
+        return
+                list.stream()
+                        .map(PrizeInfoVO::getInstance)
+                        .collect(Collectors.toList());
+    }
+
+    /**
      * 删除
      */
     @ResponseFormat
     @DeleteMapping
-    public void deleteById(@RequestParam  Long id) {
-         var aBoolean = prizeInfoServer.deleteById(id);
+    public void deleteById(@RequestParam Long id) {
+        var aBoolean = prizeInfoServer.deleteById(id);
         if (aBoolean)
             throw BusinessException.newInstance("删除失败");
     }

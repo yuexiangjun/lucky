@@ -56,14 +56,15 @@ public class SeriesTopicController {
             throw BusinessException.newInstance("修改失败");
 
     }
+
     /**
      * 修改状态
      */
     @PutMapping("/enabled")
     @ResponseFormat
-    public void  updateStatus( @RequestBody EnabledDTO enabledDTO){
+    public void updateStatus(@RequestBody EnabledDTO enabledDTO) {
 
-        topicServer.updateStatus(enabledDTO.getId(),enabledDTO.getEnabled());
+        topicServer.updateStatus(enabledDTO.getId(), enabledDTO.getEnabled());
     }
 
     /**
@@ -96,8 +97,8 @@ public class SeriesTopicController {
     @ResponseFormat
     public void setFieldsNumber(@RequestParam Long topicId, @RequestParam Integer number) {
         var aBoolean = topicServer.setFieldsNumber(topicId, number);
-        if (aBoolean)
-            throw BusinessException.newInstance("删除失败");
+        if (!aBoolean)
+            throw BusinessException.newInstance("设置场次失败");
     }
 
 
