@@ -4,6 +4,7 @@ import com.lucky.application.OrderServer;
 import com.lucky.controller.admin.dto.OrderDTO;
 import com.lucky.controller.admin.dto.StatusDTO;
 import com.lucky.controller.admin.vo.OrderVO;
+import com.lucky.controller.admin.vo.SalesVO;
 import com.lucky.utils.ResponseFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,37 +19,49 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/admin/order")
 public class OrderController {
-	private final OrderServer orderServer;
+    private final OrderServer orderServer;
 
-	public OrderController(OrderServer orderServer) {
-		this.orderServer = orderServer;
-	}
-
-
-	/**
-	 * 场次的抽奖记录
-	 * 列表
-	 */
-	@PostMapping("/list")
-	@ResponseFormat
-	public List<OrderVO> list(@RequestBody OrderDTO dto) {
-
-		var entity = OrderDTO.toEntity(dto);
-
-		return orderServer.list(entity)
-				.stream()
-				.map(OrderVO::getInstance)
-				.collect(Collectors.toList());
-	}
+    public OrderController(OrderServer orderServer) {
+        this.orderServer = orderServer;
+    }
 
 
-	/**
-	 * 修改订单状态
-	 */
-	@PutMapping("/status")
-	@ResponseFormat
-	public void updateStatus(@RequestBody StatusDTO dto) {
+    /**
+     * 场次的抽奖记录
+     * 列表
+     */
+    @PostMapping("/list")
+    @ResponseFormat
+    public List<OrderVO> list(@RequestBody OrderDTO dto) {
 
-		orderServer.updateStatus(dto.getId(), dto.getStatus());
-	}
+        var entity = OrderDTO.toEntity(dto);
+
+        return orderServer.list(entity)
+                .stream()
+                .map(OrderVO::getInstance)
+                .collect(Collectors.toList());
+    }
+
+
+    /**
+     * 修改订单状态
+     */
+    @PutMapping("/status")
+    @ResponseFormat
+    public void updateStatus(@RequestBody StatusDTO dto) {
+
+        orderServer.updateStatus(dto.getId(), dto.getStatus());
+    }
+
+    /**
+     * 某一系列利润（更据主题系列查看销售情况）
+     * 销售情况
+     */
+    @GetMapping("/sales")
+    @ResponseFormat
+    public SalesVO sales(@RequestParam Long topicId) {
+        var sales = orderServer.sales(topicId);
+        return SalesVO.getInstance(sales);
+
+    }
 }

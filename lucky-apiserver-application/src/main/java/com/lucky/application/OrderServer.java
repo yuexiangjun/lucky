@@ -4,10 +4,8 @@ import com.lucky.domain.*;
 import com.lucky.domain.config.RedissionConfig;
 import com.lucky.domain.entity.*;
 import com.lucky.domain.exception.BusinessException;
-import com.lucky.domain.valueobject.BaseDataPage;
-import com.lucky.domain.valueobject.Inventory;
-import com.lucky.domain.valueobject.Order;
-import com.lucky.domain.valueobject.SuccessProducts;
+import com.lucky.domain.valueobject.*;
+import lombok.Getter;
 import org.redisson.api.RLock;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -20,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
+@Getter
 public class OrderServer {
     private final OrderService orderService;
     private final PrizeInfoService prizeInfoService;
@@ -188,6 +187,14 @@ public class OrderServer {
 
                 prizeIds.add(prizeId);
             }
+            //库存等于0则修改状态为已抽完
+            var reduce = prizeInventory.stream()
+                    .map(Inventory::getInventory)
+                    .reduce(0, Integer::sum);
+
+            if (Objects.equals(reduce, 0))
+                sessionInfoEntity.setStatus(2);
+
             sessionInfoEntity.setPrizeInventory(prizeInventory);
 
             sessionInfoService.saveOrUpdate(sessionInfoEntity);
@@ -351,5 +358,47 @@ public class OrderServer {
         }
 
         return scaledEntries.get(scaledEntries.size() - 1).getKey(); // 理论上不会执行到这里
+    }
+
+    public Sales sales(Long topicId) {
+        var seriesTopicEntity = seriesTopicService.findById(topicId);
+        if (Objects.isNull(seriesTopicEntity))
+            return new Sales();
+
+        var prizeInfoEntities = prizeInfoService.findByTopicId(topicId);
+
+        if (CollectionUtils.isEmpty(prizeInfoEntities))
+            return new Sales();
+        //获取商品
+        var prizeMapPrice = prizeInfoEntities.stream()
+                .collect(Collectors.toMap(PrizeInfoEntity::getId, PrizeInfoEntity::getPrice));
+
+        //获取订单
+        var orderEntityList = orderService.findByTopicId(topicId);
+
+        if (CollectionUtils.isEmpty(orderEntityList))
+            return new Sales();
+        //成本
+        var costPrice = orderEntityList
+                .stream()
+                .map(orderEntity ->
+                        prizeMapPrice.getOrDefault(orderEntity.getProductId(), BigDecimal.ZERO)
+                )
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        //销售单量
+        var orderNumber = orderEntityList.size();
+        //销售金额
+        var salesAmount = BigDecimal.valueOf(orderNumber).multiply(seriesTopicEntity.getPrice());
+        //实际利润
+        var actualProfit = salesAmount.subtract(costPrice);
+
+
+        return Sales.builder()
+                .salesAmount(salesAmount)
+                .productTotalValue(costPrice)
+                .orderNumber(orderNumber)
+                .topicName(seriesTopicEntity.getName())
+                .actualProfit(actualProfit)
+                .build();
     }
 }

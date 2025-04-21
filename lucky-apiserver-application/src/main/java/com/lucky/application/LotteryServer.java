@@ -13,6 +13,7 @@ import com.lucky.domain.valueobject.PayInfo;
 import com.lucky.domain.valueobject.PayOrderPram;
 import com.lucky.domain.valueobject.SuccessProducts;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -50,14 +51,26 @@ public class LotteryServer {
      * 获取准备上面的排队人数
      */
     public Integer getQueueNum(Long topicId, Long sessionId) {
+
+        this.verifySession(sessionId);
+
         var key = getByBuyKey(topicId, sessionId);
         return redisService.getCacheObject(key) == null ? 0 : 1;
+    }
+
+    private void verifySession(Long sessionId) {
+        var sessionInfoEntity = orderServer.getSessionInfoService().findById(sessionId);
+
+        if (Objects.equals(sessionInfoEntity.getStatus(), 2))
+            throw BusinessException.newInstance("本场已结束，请选择下一场");
     }
 
     /**
      * 购买同意场次 排队
      */
     public Boolean buy(Long topicId, Long sessionId, Long wechatUserId) {
+
+        this.verifySession(sessionId);
 
         var key = this.getByBuyKey(topicId, sessionId);
 
@@ -68,7 +81,6 @@ public class LotteryServer {
         putRedisKey(key, String.valueOf(wechatUserId));
         return true;
     }
-
 
 
     /**
@@ -85,7 +97,10 @@ public class LotteryServer {
     /**
      * 支付
      */
+    @Transactional(rollbackFor = Exception.class)
     public PayInfo pay(PayOrderEntity entity) {
+
+        this.verifySession(entity.getSessionId());
 
         var key = getRedisKey(entity);
         //获取是否本场有人在操作
@@ -147,6 +162,7 @@ public class LotteryServer {
     /**
      * 支付成功 抽取的奖品
      */
+    @Transactional(rollbackFor = Exception.class)
     public List<SuccessProducts> successByPrizeInfo(Long payOrderId) {
 
         var payOrder = payOrderService.getById(payOrderId);
@@ -173,6 +189,7 @@ public class LotteryServer {
     /**
      * 支付回调
      */
+    @Transactional(rollbackFor = Exception.class)
     public String payCallBack(JSONObject jsonObject) {
 
 
@@ -193,6 +210,7 @@ public class LotteryServer {
         var key = getByBuyKey(topicId, sessionId);
         putRedisKey(key, String.valueOf(wechatUserId));
     }
+
     private static String getByBuyKey(Long topicId, Long sessionId) {
         var key = PAY_LOCK_NAME.concat("buy:")
                 .concat(String.valueOf(topicId))
