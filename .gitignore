@@ -33,3 +33,4 @@ resources/ffm/ffmpeg.exe
 
 ### Mac OS ###
 .DS_Store
+*.class
