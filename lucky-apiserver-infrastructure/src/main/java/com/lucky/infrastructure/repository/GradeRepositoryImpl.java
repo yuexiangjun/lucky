@@ -42,6 +42,7 @@ public class GradeRepositoryImpl extends ServiceImpl<GradeMapper, GradePO> imple
         var wrapper = Wrappers.<GradePO>lambdaQuery()
                 .eq(Objects.nonNull(entity.getStatus()), GradePO::getStatus, entity.getStatus())
                 .eq(Objects.nonNull(entity.getType()), GradePO::getType, entity.getType())
+                .orderByAsc(GradePO::getType)
                 .orderByAsc(GradePO::getSort);
 
         return gradeMapper.selectList(wrapper)

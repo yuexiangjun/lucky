@@ -29,6 +29,10 @@ public class GradeVO {
      */
     private Integer type;
     /**
+     * 排序
+     */
+    private Integer sort;
+    /**
      * 名称
      */
     private String name;
@@ -39,7 +43,7 @@ public class GradeVO {
     /**
      * 是否启用
      */
-    private  Boolean status;
+    private Boolean status;
 
     public static GradeVO getInstance(GradeEntity entity) {
         if (Objects.isNull(entity))
@@ -47,6 +51,7 @@ public class GradeVO {
         return GradeVO.builder()
                 .id(entity.getId())
                 .type(entity.getType())
+                .sort(entity.getSort())
                 .name(entity.getName())
                 .probability(entity.getProbability())
                 .status(entity.getStatus())
