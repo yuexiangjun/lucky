@@ -14,7 +14,7 @@ CREATE TABLE `grade` (
                          `type` int(10) DEFAULT NULL COMMENT '类别 1:隐藏 2：普通级别',
                          `name` varchar(255) DEFAULT NULL COMMENT '名称',
                          `sort` varchar(255) DEFAULT NULL COMMENT '排序',
-                         `probability` decimal(10,4) DEFAULT NULL COMMENT '概率',
+                         `probability` decimal(10,5) DEFAULT NULL COMMENT '概率',
                          `status` tinyint(1) DEFAULT '1' COMMENT '是否启用',
                          PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

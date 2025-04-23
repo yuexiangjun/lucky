@@ -48,12 +48,16 @@ public class GradeVO {
     public static GradeVO getInstance(GradeEntity entity) {
         if (Objects.isNull(entity))
             return null;
+
+         var probability = entity.getProbability();
+        if (Objects.nonNull(probability)&&probability.compareTo(BigDecimal.ZERO)>0)
+            probability = probability.multiply(new BigDecimal(1000));
         return GradeVO.builder()
                 .id(entity.getId())
                 .type(entity.getType())
                 .sort(entity.getSort())
                 .name(entity.getName())
-                .probability(entity.getProbability())
+                .probability(probability)
                 .status(entity.getStatus())
                 .build();
     }

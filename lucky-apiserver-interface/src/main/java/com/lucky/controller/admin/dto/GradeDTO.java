@@ -3,7 +3,6 @@ package com.lucky.controller.admin.dto;
 import com.lucky.domain.entity.GradeEntity;
 import com.lucky.domain.exception.BusinessException;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -43,17 +42,20 @@ public class GradeDTO {
     /**
      * 是否启用
      */
-    private  Boolean status;
+    private Boolean status;
 
     public static GradeEntity toEntity(GradeDTO dto) {
         if (Objects.isNull(dto))
             throw BusinessException.newInstance("参数为空");
+        var probability = dto.getProbability();
+        if (Objects.nonNull(probability) && probability.compareTo(BigDecimal.ZERO) > 0)
+            probability = probability.divide(new BigDecimal(1000));
         return GradeEntity.builder()
                 .id(dto.getId())
                 .type(dto.getType())
                 .sort(dto.getSort())
                 .name(dto.getName())
-                .probability(dto.getProbability())
+                .probability(probability)
                 .status(dto.getStatus())
                 .build();
     }
