@@ -58,7 +58,7 @@ public class GradeController {
 		var id = gradeServer.saveOrUpdate(entity);
 
 		if (Objects.isNull(id))
-			throw BusinessException.newInstance("添加失败");
+			throw BusinessException.newInstance("修改失败");
 
 	}
 
@@ -94,8 +94,8 @@ public class GradeController {
 
 		var aBoolean = gradeServer.deleteById(id);
 
-		if (aBoolean)
-			throw BusinessException.newInstance("添加失败");
+		if (!aBoolean)
+			throw BusinessException.newInstance("删除失败");
 	}
 
 	/**

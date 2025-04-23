@@ -74,7 +74,7 @@ public class SeriesTopicController {
     @ResponseFormat
     public void deleteById(@RequestParam Long id) {
         var aBoolean = topicServer.deleteById(id);
-        if (aBoolean)
+        if (!aBoolean)
             throw BusinessException.newInstance("删除失败");
     }
 
