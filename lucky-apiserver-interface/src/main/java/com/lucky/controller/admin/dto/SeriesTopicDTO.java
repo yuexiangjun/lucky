@@ -22,7 +22,7 @@ public class SeriesTopicDTO {
     /**
      * id
      */
-    private  Long id;
+    private Long id;
     /**
      * 名称
      */
@@ -44,6 +44,10 @@ public class SeriesTopicDTO {
      * 价格（多少钱一抽）
      */
     private BigDecimal price;
+    /**
+     * 是否启用
+     */
+    private Boolean status;
 
     public static SeriesTopicEntity toEntity(SeriesTopicDTO dto) {
 
@@ -54,13 +58,13 @@ public class SeriesTopicDTO {
                 .id(dto.getId())
                 .name(dto.getName())
                 .topicColor(dto.getTopicColor())
+                .status(dto.getStatus())
                 .topicUrl(dto.getTopicUrl())
                 .price(dto.getPrice())
                 .gradeIds(dto.getGradeIds())
                 .build();
 
     }
-
 
 
 }

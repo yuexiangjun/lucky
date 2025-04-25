@@ -1,8 +1,7 @@
-package com.lucky.controller.admin.vo;
+package com.lucky.domain.valueobject;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.lucky.domain.entity.SeriesTopicEntity;
-import com.lucky.domain.valueobject.SeriesTopicDetail;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 主题 系列
@@ -19,7 +20,7 @@ import java.util.Objects;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SeriesTopicVO {
+public class SeriesTopicDetail {
     /**
      * id
      */
@@ -54,20 +55,22 @@ public class SeriesTopicVO {
     /**
      * 奖项详情
      */
-    private List<DropBoxVO> gradeDetail;
+    private List<DropBox> gradeDetail;
 
-
-    /**
-     * @param entity
-     * @return
-     */
-
-    public static SeriesTopicVO getInstance(SeriesTopicDetail entity) {
-
+    public static SeriesTopicDetail getInstance(SeriesTopicEntity entity, Map<Long, String> gradeMapName) {
         if (Objects.isNull(entity))
             return null;
-        return BeanUtil.toBean(entity, SeriesTopicVO.class);
-
+        SeriesTopicDetail bean = BeanUtil.toBean(entity, SeriesTopicDetail.class);
+        List<Long> gradeIds = entity.getGradeIds();
+        if (Objects.nonNull(gradeIds)) {
+            bean.setGradeDetail(
+                    gradeIds
+                            .stream()
+                            .map(id -> DropBox.builder().id(id).name(gradeMapName.get(id)).build())
+                            .collect(Collectors.toList())
+            );
+        }
+        return bean;
 
     }
 
