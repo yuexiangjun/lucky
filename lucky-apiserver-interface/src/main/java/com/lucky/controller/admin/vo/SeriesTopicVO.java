@@ -71,5 +71,19 @@ public class SeriesTopicVO {
 
     }
 
+    /**
+     * @param entity
+     * @return
+     */
+
+    public static SeriesTopicVO getInstance(SeriesTopicEntity entity) {
+
+        if (Objects.isNull(entity))
+            return null;
+        return BeanUtil.toBean(entity, SeriesTopicVO.class);
+
+
+    }
+
 
 }

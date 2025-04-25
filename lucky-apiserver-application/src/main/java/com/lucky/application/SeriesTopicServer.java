@@ -127,8 +127,17 @@ public class SeriesTopicServer {
         throw BusinessException.newInstance("添加场次失败");
     }
 
-    public SeriesTopicEntity findById(Long id) {
-        return seriesTopicService.findById(id);
+    public SeriesTopicDetail findById(Long id) {
+        SeriesTopicEntity byId = seriesTopicService.findById(id);
+        if (Objects.isNull(byId))
+            return null;
+        var gradeIds = byId.getGradeIds();
+        if (CollectionUtils.isEmpty(gradeIds))
+            return SeriesTopicDetail.getInstance(byId, null);
+        var gradeEntityList = gradeService.findByIds(gradeIds);
+        var gradeMapName = gradeEntityList.stream()
+                .collect(Collectors.toMap(GradeEntity::getId, GradeEntity::getName));
+        return SeriesTopicDetail.getInstance(byId, gradeMapName);
     }
 
 }
