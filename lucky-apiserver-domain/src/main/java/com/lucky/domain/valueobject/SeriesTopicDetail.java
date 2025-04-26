@@ -66,7 +66,15 @@ public class SeriesTopicDetail {
             bean.setGradeDetail(
                     gradeIds
                             .stream()
-                            .map(id -> DropBox.builder().id(id).name(gradeMapName.get(id)).build())
+                            .map(id -> {
+                                String name1 = gradeMapName.get(id);
+                                if (Objects.isNull(name1))
+                                    return null;
+                                return DropBox.builder()
+                                        .id(id)
+                                        .name(name1)
+                                        .build();
+                            }).filter(Objects::nonNull)
                             .collect(Collectors.toList())
             );
         }

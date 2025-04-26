@@ -1,5 +1,6 @@
 package com.lucky.application;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.lucky.domain.GradeService;
 import com.lucky.domain.PrizeInfoService;
 import com.lucky.domain.SeriesTopicService;
@@ -72,7 +73,7 @@ public class SeriesTopicServer {
 
         var gradeIds = byList.stream()
                 .map(SeriesTopicEntity::getGradeIds)
-                .filter(CollectionUtils::isEmpty)
+                .filter(CollectionUtil::isNotEmpty)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 

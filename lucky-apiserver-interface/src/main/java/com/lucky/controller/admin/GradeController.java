@@ -22,96 +22,96 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/grade")
 public class GradeController {
-	private final GradeServer gradeServer;
+    private final GradeServer gradeServer;
 
-	public GradeController(GradeServer gradeServer) {
-		this.gradeServer = gradeServer;
-	}
+    public GradeController(GradeServer gradeServer) {
+        this.gradeServer = gradeServer;
+    }
 
-	/**
-	 * 添加
-	 */
-	@PostMapping()
-	@ResponseFormat
-	public void save(@RequestBody GradeDTO gradeDTO) {
+    /**
+     * 添加
+     */
+    @PostMapping()
+    @ResponseFormat
+    public void save(@RequestBody GradeDTO gradeDTO) {
 
-		var entity = GradeDTO.toEntity(gradeDTO);
+        var entity = GradeDTO.toEntity(gradeDTO);
 
-		var id = gradeServer.saveOrUpdate(entity);
-		if (Objects.isNull(id))
-			throw BusinessException.newInstance("添加失败");
+        var id = gradeServer.saveOrUpdate(entity);
+        if (Objects.isNull(id))
+            throw BusinessException.newInstance("添加失败");
 
-	}
+    }
 
 
-	/**
-	 * 修改
-	 */
-	@PutMapping()
-	@ResponseFormat
-	public void update(@RequestBody GradeDTO gradeDTO) {
-		var entity = GradeDTO.toEntity(gradeDTO);
+    /**
+     * 修改
+     */
+    @PutMapping()
+    @ResponseFormat
+    public void update(@RequestBody GradeDTO gradeDTO) {
+        var entity = GradeDTO.toEntity(gradeDTO);
 
-		if (Objects.isNull(entity.getId()))
-			throw BusinessException.newInstance("缺少id参数");
+        if (Objects.isNull(entity.getId()))
+            throw BusinessException.newInstance("缺少id参数");
 
-		var id = gradeServer.saveOrUpdate(entity);
+        var id = gradeServer.saveOrUpdate(entity);
 
-		if (Objects.isNull(id))
-			throw BusinessException.newInstance("修改失败");
+        if (Objects.isNull(id))
+            throw BusinessException.newInstance("修改失败");
 
-	}
+    }
 
-	/**
-	 * 启用禁用
-	 */
-	@PutMapping("/enabled")
-	@ResponseFormat
-	public void enabled(@RequestBody EnabledDTO dto) {
-		gradeServer.enabled(dto.getId(), dto.getEnabled());
-	}
+    /**
+     * 启用禁用
+     */
+    @PutMapping("/enabled")
+    @ResponseFormat
+    public void enabled(@RequestBody EnabledDTO dto) {
+        gradeServer.enabled(dto.getId(), dto.getEnabled());
+    }
 
-	/**
-	 * 列表
-	 */
-	@PostMapping("/list")
-	@ResponseFormat
-	public List<GradeVO> findByList() {
-		return gradeServer.findByList(new GradeEntity())
-				.stream()
-				.map(GradeVO::getInstance)
-				.collect(Collectors.toList());
-	}
+    /**
+     * 列表
+     */
+    @PostMapping("/list")
+    @ResponseFormat
+    public List<GradeVO> findByList() {
+        return gradeServer.findByList(new GradeEntity())
+                .stream()
+                .map(GradeVO::getInstance)
+                .collect(Collectors.toList());
+    }
 
-	/**
-	 * 删除
-	 */
-	@DeleteMapping("/id")
-	@ResponseFormat
-	public void deleteById(@RequestParam Long id) {
-		if (Objects.isNull(id))
-			throw BusinessException.newInstance("缺少id参数");
+    /**
+     * 删除
+     */
+    @DeleteMapping("/id")
+    @ResponseFormat
+    public void deleteById(@RequestParam Long id) {
+        if (Objects.isNull(id))
+            throw BusinessException.newInstance("缺少id参数");
 
-		var aBoolean = gradeServer.deleteById(id);
+        var aBoolean = gradeServer.deleteById(id);
 
-		if (!aBoolean)
-			throw BusinessException.newInstance("删除失败");
-	}
+        if (!aBoolean)
+            throw BusinessException.newInstance("删除失败");
+    }
 
-	/**
-	 * 添加主题时 下拉框
-	 */
-	@GetMapping("/drop-down-box")
-	@ResponseFormat
-	public List<DropBoxVO> dropBox(@RequestParam Integer type) {
-		var entity = GradeEntity.builder()
-				.type(type)
-				.status(true)
-				.build();
-		return gradeServer.findByList(entity)
-				.stream()
-				.map(s -> DropBoxVO.getInstance(s.getId(), s.getName()))
-				.collect(Collectors.toList());
-	}
+    /**
+     * 添加主题时 下拉框
+     */
+    @GetMapping("/drop-down-box")
+    @ResponseFormat
+    public List<DropBoxVO> dropBox(@RequestParam(required = false) Integer type) {
+        var entity = GradeEntity.builder()
+                .type(type)
+                .status(true)
+                .build();
+        return gradeServer.findByList(entity)
+                .stream()
+                .map(s -> DropBoxVO.getInstance(s.getId(), s.getName()))
+                .collect(Collectors.toList());
+    }
 
 }
