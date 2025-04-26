@@ -3,8 +3,10 @@ package com.lucky.controller.admin;
 import com.lucky.application.PrizeInfoServer;
 import com.lucky.controller.admin.dto.PrizeInfoDTO;
 import com.lucky.controller.admin.vo.PrizeInfoVO;
+import com.lucky.domain.entity.PrizeInfoEntity;
 import com.lucky.domain.exception.BusinessException;
 import com.lucky.utils.ResponseFormat;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +40,35 @@ public class PrizeInfoController {
         if (Objects.isNull(id))
             throw BusinessException.newInstance("添加失败");
 
+    }
+
+    /**
+     * 批量添加
+     */
+    @PostMapping("/save-batch")
+    @ResponseFormat
+    public Boolean saveList(@RequestBody List<PrizeInfoDTO> dtos) {
+        if (CollectionUtils.isEmpty(dtos))
+            throw BusinessException.newInstance("缺少参数");
+
+        var entity = dtos.stream()
+                .map(PrizeInfoDTO::toEntity)
+                .collect(Collectors.toList());
+        return prizeInfoServer.saveOrUpdateList(entity);
+    }
+    /**
+     * 批量修改
+     */
+    @PostMapping("/update-batch")
+    @ResponseFormat
+    public Boolean updateList(@RequestBody List<PrizeInfoDTO> dtos) {
+        if (CollectionUtils.isEmpty(dtos))
+            throw BusinessException.newInstance("缺少参数");
+
+        var entity = dtos.stream()
+                .map(PrizeInfoDTO::toEntity)
+                .collect(Collectors.toList());
+        return prizeInfoServer.saveOrUpdateList(entity);
     }
 
     /**

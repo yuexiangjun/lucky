@@ -25,6 +25,12 @@ public class PrizeInfoServer {
     public Long saveOrUpdate(PrizeInfoEntity entity) {
         return prizeInfoService.saveOrUpdate(entity);
     }
+    /**
+     * 批量添加/修改
+     */
+    public  Boolean saveOrUpdateList(List<PrizeInfoEntity> entity) {
+        return prizeInfoService.saveOrUpdateList(entity);
+    }
 
     /**
      * 删除

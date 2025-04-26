@@ -26,6 +26,13 @@ public class PrizeInfoService {
     }
 
     /**
+     * 批量添加/修改
+     */
+    public  Boolean saveOrUpdateList(List<PrizeInfoEntity> entity) {
+        return prizeInfoRepository.saveOrUpdateList(entity);
+    }
+
+    /**
      * 删除
      */
     public Boolean deleteById(Long id) {

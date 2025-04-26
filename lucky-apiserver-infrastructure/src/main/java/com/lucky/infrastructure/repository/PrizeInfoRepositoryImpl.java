@@ -18,63 +18,70 @@ import java.util.stream.Collectors;
  */
 @Component
 public class PrizeInfoRepositoryImpl extends ServiceImpl<PrizeInfoMapper, PrizeInfoPO> implements PrizeInfoRepository {
-	private final PrizeInfoMapper prizeInfoMapper;
+    private final PrizeInfoMapper prizeInfoMapper;
 
-	public PrizeInfoRepositoryImpl(PrizeInfoMapper prizeInfoMapper) {
-		this.prizeInfoMapper = prizeInfoMapper;
-	}
+    public PrizeInfoRepositoryImpl(PrizeInfoMapper prizeInfoMapper) {
+        this.prizeInfoMapper = prizeInfoMapper;
+    }
 
 
-	/**
-	 * 添加/修改
-	 */
-	public Long saveOrUpdate(PrizeInfoEntity entity) {
+    /**
+     * 添加/修改
+     */
+    public Long saveOrUpdate(PrizeInfoEntity entity) {
 
-		var gradePO = PrizeInfoPO.getInstance(entity);
+        var gradePO = PrizeInfoPO.getInstance(entity);
 
-		if (Objects.isNull(gradePO))
-			return null;
+        if (Objects.isNull(gradePO))
+            return null;
 
-		if (Objects.isNull(gradePO.getId()))
-			prizeInfoMapper.insert(gradePO);
-		else
-			prizeInfoMapper.updateById(gradePO);
-		return gradePO.getId();
-	}
+        if (Objects.isNull(gradePO.getId()))
+            prizeInfoMapper.insert(gradePO);
+        else
+            prizeInfoMapper.updateById(gradePO);
+        return gradePO.getId();
+    }
 
-	/**
-	 * 删除
-	 */
-	public Boolean deleteById(Long id) {
-		int i = prizeInfoMapper.deleteById(id);
-		if (i > 0)
-			return true;
-		else
-			return false;
-	}
+    /**
+     * 删除
+     */
+    public Boolean deleteById(Long id) {
+        int i = prizeInfoMapper.deleteById(id);
+        if (i > 0)
+            return true;
+        else
+            return false;
+    }
 
-	@Override
-	public List<PrizeInfoEntity> findByTopicId(Long topicId) {
-		var wrapper = Wrappers.lambdaQuery(PrizeInfoPO.class)
-				.eq(PrizeInfoPO::getTopicId, topicId);
-		return prizeInfoMapper.selectList(wrapper)
-				.stream()
-				.map(PrizeInfoPO::toEntity)
-				.collect(Collectors.toList());
+    @Override
+    public List<PrizeInfoEntity> findByTopicId(Long topicId) {
+        var wrapper = Wrappers.lambdaQuery(PrizeInfoPO.class)
+                .eq(PrizeInfoPO::getTopicId, topicId);
+        return prizeInfoMapper.selectList(wrapper)
+                .stream()
+                .map(PrizeInfoPO::toEntity)
+                .collect(Collectors.toList());
 
-	}
+    }
 
-	@Override
-	public List<PrizeInfoEntity> findByIds(List<Long> productIds) {
-		if (CollectionUtils.isEmpty(productIds))
-			return List.of();
+    @Override
+    public List<PrizeInfoEntity> findByIds(List<Long> productIds) {
+        if (CollectionUtils.isEmpty(productIds))
+            return List.of();
 
-		var wrapper = Wrappers.lambdaQuery(PrizeInfoPO.class)
-				.in(PrizeInfoPO::getId, productIds);
-		return prizeInfoMapper.selectList(wrapper)
-				.stream()
-				.map(PrizeInfoPO::toEntity)
-				.collect(Collectors.toList());
+        var wrapper = Wrappers.lambdaQuery(PrizeInfoPO.class)
+                .in(PrizeInfoPO::getId, productIds);
+        return prizeInfoMapper.selectList(wrapper)
+                .stream()
+                .map(PrizeInfoPO::toEntity)
+                .collect(Collectors.toList());
 
-	}
+    }
+
+    @Override
+    public Boolean saveOrUpdateList(List<PrizeInfoEntity> entity) {
+        if (CollectionUtils.isEmpty(entity))
+            return false;
+        return this.saveOrUpdateBatch(entity.stream().map(PrizeInfoPO::getInstance).collect(Collectors.toList()));
+    }
 }
