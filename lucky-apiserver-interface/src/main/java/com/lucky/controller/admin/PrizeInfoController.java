@@ -56,6 +56,7 @@ public class PrizeInfoController {
                 .collect(Collectors.toList());
         return prizeInfoServer.saveOrUpdateList(entity);
     }
+
     /**
      * 批量修改
      */

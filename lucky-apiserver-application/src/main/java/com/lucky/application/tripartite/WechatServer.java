@@ -10,6 +10,7 @@ import com.lucky.domain.valueobject.WechatConfigValueObject;
 import com.lucky.domain.valueobject.WechatPhone;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Component
@@ -58,7 +59,9 @@ public class WechatServer {
      * 小程序登录参数
      */
     public Code2Session code2Session(String jsCode) {
+
         var code2Session = wechatService.code2Session(jsCode);
+
         var wechatUserEntity = wechatUserServer.getByOpenId(code2Session.getOpenid());
 
         if (Objects.nonNull(wechatUserEntity)) {
@@ -66,6 +69,7 @@ public class WechatServer {
             var token = getToken(wechatUserEntity);
 
             code2Session.setAuthorization(token);
+            code2Session.setWechatUserId(wechatUserEntity.getId());
         }
 
 
@@ -84,19 +88,32 @@ public class WechatServer {
         return token;
     }
 
-    public Code2Session register(String openId, String phone) {
 
-        var wechatUserEntity = wechatUserServer.getByOpenId(openId);
 
-        wechatUserEntity.setPhone(phone);
+    public Code2Session register2(String jsCode, String phoneCode) {
+        //获取手机号码
+        var phone = this.getPhoneNumberToken(phoneCode);
+        //获取openId
+        var code2Session = this.code2Session(jsCode);
 
-        wechatUserServer.saveOrUpdate(wechatUserEntity);
+        var entity = WechatUserEntity
+                .builder()
+                .openid(code2Session.getOpenid())
+                .phone(phone.getPurePhoneNumber())
+                .createTime(LocalDateTime.now())
+                .enabled(true)
+                .build();
+        var id = wechatUserServer.saveOrUpdate(entity);
+        entity.setId(id);
 
-        var token = getToken(wechatUserEntity);
+        String token = getToken(entity);
 
         return Code2Session.builder()
                 .authorization(token)
-                .openid(openId)
+                .openid(code2Session.getOpenid())
+                .wechatUserId(id)
                 .build();
+
+
     }
 }

@@ -32,7 +32,7 @@ public class WechatUserServer {
         var oldEntity = wechatUserService.getByOpenId(entity.getOpenid());
 
         if (Objects.isNull(oldEntity)) {
-            entity.setEnabled(1);
+            entity.setEnabled(true);
             entity.setCreateTime(LocalDateTime.now());
             oldEntity = entity;
         } else {

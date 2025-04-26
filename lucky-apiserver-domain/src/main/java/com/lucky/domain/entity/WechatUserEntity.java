@@ -35,7 +35,7 @@ public class WechatUserEntity {
 	/**
 	 * 是否启用
 	 */
-	private Integer enabled;
+	private Boolean enabled;
 	/**
 	 * 最后一次登录时间
 	 */

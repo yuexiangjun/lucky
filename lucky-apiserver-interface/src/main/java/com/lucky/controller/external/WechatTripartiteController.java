@@ -39,40 +39,27 @@ public class WechatTripartiteController {
     public Code2SessionVO code2Session(@RequestParam String jsCode) {
         var code2Session = wechatServer.code2Session(jsCode);
         return Code2SessionVO.builder()
-                .openid(code2Session.getOpenid())
-                .sessionKey(code2Session.getSessionKey())
                 .authorization(code2Session.getAuthorization())
                 .build();
     }
 
 
-    /**
-     * 2：根据获取手机号码的组件code 获取手机号码
-     *
-     * @param code
-     * @return
-     */
-    @GetMapping("/code")
-    @ResponseFormat
-    public WechatPhoneVO getPhoneNumberToken(@RequestParam String code) {
-        var phoneNumberToken = wechatServer.getPhoneNumberToken(code);
-        return WechatPhoneVO.getInstance(phoneNumberToken);
-    }
 
     /**
-     * 3:更据openId注册
+     * 根据jscode 和手机组件code注册
      */
     @GetMapping("/register")
     @ResponseFormat
-    public Code2SessionVO register(@RequestParam String openId, @RequestParam String phone) {
-        var code2Session = wechatServer.register(openId, phone);
+    public Code2SessionVO register(@RequestParam String jsCode, @RequestParam String phoneCode) {
+        var code2Session = wechatServer.register2(jsCode, phoneCode);
         return Code2SessionVO.builder()
-                .openid(code2Session.getOpenid())
-                .sessionKey(code2Session.getSessionKey())
                 .authorization(code2Session.getAuthorization())
+                .wechatUserId(code2Session.getWechatUserId())
                 .build();
 
     }
+
+
 
 
 }

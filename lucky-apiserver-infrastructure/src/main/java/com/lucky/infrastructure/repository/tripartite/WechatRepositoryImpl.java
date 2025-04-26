@@ -121,7 +121,10 @@ public class WechatRepositoryImpl implements WechatRepository {
             if (Strings.isBlank(sessionKey)) {
                 throw BusinessException.newInstance("当期小程序登录参数失败");
             }
-            return new Code2Session(openid, sessionKey,null);
+            return Code2Session.builder()
+                    .sessionKey(sessionKey)
+                    .openid(openid)
+                    .build();
         }
         switch (errcode) {
             case "40029":
@@ -140,7 +143,10 @@ public class WechatRepositoryImpl implements WechatRepository {
                 if (Strings.isBlank(sessionKey)) {
                     throw BusinessException.newInstance("当期小程序登录参数失败");
                 }
-                return new Code2Session(openid, sessionKey,null);
+                return Code2Session.builder()
+                        .sessionKey(sessionKey)
+                        .openid(openid)
+                        .build();
             default:
                 redisTemplate.delete("wechat_access_token");
                 throw BusinessException.newInstance("系统繁忙，稍候再试");

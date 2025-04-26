@@ -10,14 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class Code2SessionVO {
+
 	/**
-	 * 微信用户唯一标识
+	 * 微信用户id
 	 */
-	private String openid;
-	/**
-	 * 会话密钥
-	 */
-	private String sessionKey;
+	private Long wechatUserId;
+
 	/**
 	 * token
 	 */

@@ -12,6 +12,11 @@ import lombok.NoArgsConstructor;
 public class Code2Session {
 	private String openid;
 	private String sessionKey;
+
+	/**
+	 * 微信用户id
+	 */
+	private Long wechatUserId;
 	/**
 	 * Authorization
 	 */
