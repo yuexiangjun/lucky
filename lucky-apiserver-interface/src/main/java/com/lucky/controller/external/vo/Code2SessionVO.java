@@ -18,5 +18,9 @@ public class Code2SessionVO {
 	 * 会话密钥
 	 */
 	private String sessionKey;
+	/**
+	 * token
+	 */
+	private String authorization;
 
 }

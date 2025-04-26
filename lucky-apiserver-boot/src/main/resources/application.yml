@@ -13,8 +13,8 @@ spring:
     port: 6379
     password:
 wechat:
-  appid: wx293938d12189809d
-  secret: ccac88ef2c23584f488dc0ddd5b13d02
+  appid: wxd827da4ada3486fd
+  secret: bc2d8696bf75e4d2c077a74499018813
   accessTokenUrl: https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=SECRET
   phoneNumberUrl: https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=ACCESS_TOKEN
   code2SessionUrl: https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code

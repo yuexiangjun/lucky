@@ -21,6 +21,7 @@ public class LoginConfig implements WebMvcConfigurer {
                 "/**/*.css"  ,                //css静态资源
                 "/wechat/tripartite/**",
                 "/**/login"
+
                 );
     }
 }
