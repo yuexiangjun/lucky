@@ -1,8 +1,10 @@
 package com.lucky.infrastructure.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lucky.domain.entity.PrizeInfoEntity;
+import com.lucky.domain.exception.BusinessException;
 import com.lucky.domain.repository.PrizeInfoRepository;
 import com.lucky.infrastructure.repository.mysql.mapper.PrizeInfoMapper;
 import com.lucky.infrastructure.repository.mysql.po.PrizeInfoPO;
@@ -82,6 +84,20 @@ public class PrizeInfoRepositoryImpl extends ServiceImpl<PrizeInfoMapper, PrizeI
     public Boolean saveOrUpdateList(List<PrizeInfoEntity> entity) {
         if (CollectionUtils.isEmpty(entity))
             return false;
-        return this.saveOrUpdateBatch(entity.stream().map(PrizeInfoPO::getInstance).collect(Collectors.toList()));
+        PrizeInfoEntity prizeInfoEntity = entity.get(0);
+
+        if (Objects.isNull(prizeInfoEntity.getTopicId()))
+            throw  BusinessException .newInstance("缺少TopicId");
+
+        var wrapper = Wrappers.lambdaQuery(PrizeInfoPO.class)
+                .eq(PrizeInfoPO::getTopicId, prizeInfoEntity.getTopicId());
+
+        this.remove(wrapper);
+
+        var prizeInfopos = entity.stream()
+                .map(PrizeInfoPO::getInstance)
+                .collect(Collectors.toList());
+
+        return this.saveOrUpdateBatch(prizeInfopos);
     }
 }
