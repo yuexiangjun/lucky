@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.logging.log4j.util.Strings;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -29,6 +30,7 @@ public class JwtUtils {
 
 		return Jwts.builder()
 				.setClaims(jsonObject)
+				.setExpiration(new Date(System.currentTimeMillis() + 604800000))
 				.signWith(SignatureAlgorithm.HS512, secret)
 				.compact();
 

@@ -70,6 +70,10 @@ public class WechatServer {
 
             code2Session.setAuthorization(token);
             code2Session.setWechatUserId(wechatUserEntity.getId());
+
+
+            wechatUserEntity.setLastLoginTime(LocalDateTime.now());
+            wechatUserServer.saveOrUpdate(wechatUserEntity);
         }
 
 
@@ -103,7 +107,9 @@ public class WechatServer {
                 .createTime(LocalDateTime.now())
                 .enabled(true)
                 .build();
+        entity.setLastLoginTime(LocalDateTime.now());
         var id = wechatUserServer.saveOrUpdate(entity);
+
         entity.setId(id);
 
         String token = getToken(entity);
