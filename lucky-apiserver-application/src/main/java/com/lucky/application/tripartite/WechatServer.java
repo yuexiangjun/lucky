@@ -59,9 +59,7 @@ public class WechatServer {
      * 小程序登录参数
      */
     public Code2Session code2Session(String jsCode) {
-
         var code2Session = wechatService.code2Session(jsCode);
-
         var wechatUserEntity = wechatUserServer.getByOpenId(code2Session.getOpenid());
 
         if (Objects.nonNull(wechatUserEntity)) {

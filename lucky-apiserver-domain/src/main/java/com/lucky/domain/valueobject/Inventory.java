@@ -26,7 +26,9 @@ public class Inventory {
     public static Inventory getInstance(PrizeInfoEntity prizeInfoEntity) {
         if (Objects.isNull(prizeInfoEntity))
             return null;
-        return BeanUtil.toBean(prizeInfoEntity, Inventory.class);
+        Inventory bean = BeanUtil.toBean(prizeInfoEntity, Inventory.class);
+        bean.setPrizeId(prizeInfoEntity.getId());
+        return bean;
 
     }
 
