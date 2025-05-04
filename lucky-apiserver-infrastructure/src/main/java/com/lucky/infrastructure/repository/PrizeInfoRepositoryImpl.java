@@ -1,6 +1,5 @@
 package com.lucky.infrastructure.repository;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lucky.domain.entity.PrizeInfoEntity;
@@ -47,6 +46,7 @@ public class PrizeInfoRepositoryImpl extends ServiceImpl<PrizeInfoMapper, PrizeI
     /**
      * 删除
      */
+
     public Boolean deleteById(Long id) {
         int i = prizeInfoMapper.deleteById(id);
         if (i > 0)
@@ -81,23 +81,24 @@ public class PrizeInfoRepositoryImpl extends ServiceImpl<PrizeInfoMapper, PrizeI
     }
 
     @Override
-    public Boolean saveOrUpdateList(List<PrizeInfoEntity> entity) {
-        if (CollectionUtils.isEmpty(entity))
-            return false;
-        PrizeInfoEntity prizeInfoEntity = entity.get(0);
+    public Boolean saveOrUpdateList(List<PrizeInfoEntity> entity, Long topicId) {
 
-        if (Objects.isNull(prizeInfoEntity.getTopicId()))
-            throw  BusinessException .newInstance("缺少TopicId");
+
+        if (Objects.isNull(topicId))
+            throw BusinessException.newInstance("缺少TopicId");
 
         var wrapper = Wrappers.lambdaQuery(PrizeInfoPO.class)
-                .eq(PrizeInfoPO::getTopicId, prizeInfoEntity.getTopicId());
+                .eq(PrizeInfoPO::getTopicId, topicId);
 
         this.remove(wrapper);
 
-        var prizeInfopos = entity.stream()
-                .map(PrizeInfoPO::getInstance)
-                .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(entity)) {
+            var prizeInfopos = entity.stream()
+                    .map(PrizeInfoPO::getInstance)
+                    .collect(Collectors.toList());
 
-        return this.saveOrUpdateBatch(prizeInfopos);
+            return this.saveOrUpdateBatch(prizeInfopos);
+        }
+        return true;
     }
 }

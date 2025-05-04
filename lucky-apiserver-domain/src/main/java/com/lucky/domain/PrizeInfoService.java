@@ -28,8 +28,8 @@ public class PrizeInfoService {
     /**
      * 批量添加/修改
      */
-    public  Boolean saveOrUpdateList(List<PrizeInfoEntity> entity) {
-        return prizeInfoRepository.saveOrUpdateList(entity);
+    public  Boolean saveOrUpdateList(List<PrizeInfoEntity> entity, Long topicId) {
+        return prizeInfoRepository.saveOrUpdateList(entity,topicId);
     }
 
     /**

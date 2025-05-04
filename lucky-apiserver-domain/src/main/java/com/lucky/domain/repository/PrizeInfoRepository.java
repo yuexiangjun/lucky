@@ -14,5 +14,5 @@ public interface PrizeInfoRepository {
 
     List<PrizeInfoEntity> findByIds(List<Long> productIds);
 
-    Boolean saveOrUpdateList(List<PrizeInfoEntity> entity);
+    Boolean saveOrUpdateList(List<PrizeInfoEntity> entity, Long topicId);
 }

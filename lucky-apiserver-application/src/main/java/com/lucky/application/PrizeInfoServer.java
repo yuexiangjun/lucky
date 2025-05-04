@@ -6,9 +6,11 @@ import com.lucky.domain.entity.GradeEntity;
 import com.lucky.domain.entity.PrizeInfoEntity;
 import com.lucky.domain.exception.BusinessException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +30,7 @@ public class PrizeInfoServer {
     /**
      * 添加/修改
      */
+    @Transactional(rollbackFor = Exception.class)
     public Long saveOrUpdate(PrizeInfoEntity entity) {
         return prizeInfoService.saveOrUpdate(entity);
     }
@@ -35,24 +38,26 @@ public class PrizeInfoServer {
     /**
      * 批量添加/修改
      */
-    public Boolean saveOrUpdateList(List<PrizeInfoEntity> entity) {
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean saveOrUpdateList(List<PrizeInfoEntity> entity, Long topicId) {
 
-        if (CollectionUtils.isEmpty(entity))
-            throw BusinessException.newInstance("奖品列表不能为空");
+        if (Objects.isNull(topicId))
+            throw BusinessException.newInstance("奖品所属系列为空");
+        if (!CollectionUtils.isEmpty(entity)) {
+            var gradeIds = entity.stream()
+                    .map(PrizeInfoEntity::getGradeId)
+                    .collect(Collectors.toList());
 
-        var gradeIds = entity.stream()
-                .map(PrizeInfoEntity::getGradeId)
-                .collect(Collectors.toList());
+            var gradeMapName = gradeService.findByIds(gradeIds).stream()
+                    .collect(Collectors.toMap(GradeEntity::getId, GradeEntity::getType, (a, b) -> a));
 
-        var gradeMapName = gradeService.findByIds(gradeIds).stream()
-                .collect(Collectors.toMap(GradeEntity::getId, GradeEntity::getType, (a, b) -> a));
+            entity = entity
+                    .stream()
+                    .peek(s -> s.setType(gradeMapName.get(s.getGradeId())))
+                    .collect(Collectors.toList());
+        }
 
-        entity = entity
-                .stream()
-                .peek(s -> s.setType(gradeMapName.get(s.getGradeId())))
-                .collect(Collectors.toList());
-        
-        return prizeInfoService.saveOrUpdateList(entity);
+        return prizeInfoService.saveOrUpdateList(entity, topicId);
     }
 
     /**

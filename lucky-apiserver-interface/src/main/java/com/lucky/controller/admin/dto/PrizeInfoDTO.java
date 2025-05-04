@@ -57,14 +57,14 @@ public class PrizeInfoDTO {
      * @param dto
      * @return
      */
-    public static PrizeInfoEntity toEntity(PrizeInfoDTO dto) {
+    public static PrizeInfoEntity toEntity(PrizeInfoDTO dto, Long topicId) {
         if (Objects.isNull(dto))
-            throw BusinessException.newInstance("缺少参数");
+            return null;
         return PrizeInfoEntity.builder()
                 .id(dto.getId())
                 .type(dto.getType())
                 .gradeId(dto.getGradeId())
-                .topicId(dto.getTopicId())
+                .topicId(topicId)
                 .price(dto.getPrice())
                 .prizeName(dto.getPrizeName())
                 .prizeUrl(dto.getPrizeUrl())

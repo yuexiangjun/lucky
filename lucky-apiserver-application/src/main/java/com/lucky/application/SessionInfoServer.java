@@ -12,11 +12,10 @@ import com.lucky.domain.valueobject.SessionInfo;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-
 import java.util.Comparator;
-
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -66,8 +65,23 @@ public class SessionInfoServer {
         var gradeIds = prizeInfoEntities.stream()
                 .map(PrizeInfoEntity::getGradeId)
                 .collect(Collectors.toList());
-
         var gradeEntityMap = this.getGradeEntityMap(gradeIds);
+        var hides = prizeInfoEntities.stream()
+                .filter(p -> Objects.equals(p.getType(), 1))
+                .map(s -> {
+                            GradeEntity gradeEntity = gradeEntityMap.get(s.getGradeId());
+
+                            return InventoryInfo.builder()
+                                    .prizeId(s.getId())
+                                    .prizeUrl(s.getPrizeUrl())
+                                    .prizeName(s.getPrizeName())
+                                    .gradeName(gradeEntity.getName())
+                                    .sort(gradeEntity.getSort())
+                                    .build();
+                        }
+                )
+                .collect(Collectors.toList());
+
 
         var prizeInfoEntityMap = this.getPrizeInfoEntityMap(prizeInfoEntities);
         //总库存
@@ -96,9 +110,13 @@ public class SessionInfoServer {
                                         .gradeName(gradeEntity.getName())
                                         .sort(gradeEntity.getSort())
                                         .build();
-                            }).sorted(Comparator.comparingInt(InventoryInfo::getSort))
+                            })
                             .collect(Collectors.toList());
 
+                    if (!CollectionUtils.isEmpty(hides)) {
+                        inventoryInfos.addAll(hides);
+                    }
+                    inventoryInfos.sort(Comparator.comparingInt(InventoryInfo::getSort));
                     return SessionInfo.builder()
                             .id(s.getId())
                             .totalInventory(totalInventory)
@@ -109,6 +127,7 @@ public class SessionInfoServer {
 
 
                 })
+
                 .collect(Collectors.toList());
 
         return BaseDataPage.newInstance(

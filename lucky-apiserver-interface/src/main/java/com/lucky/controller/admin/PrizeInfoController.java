@@ -34,7 +34,7 @@ public class PrizeInfoController {
     @PostMapping
     @ResponseFormat
     public void save(@RequestBody PrizeInfoDTO dto) {
-        var entity = PrizeInfoDTO.toEntity(dto);
+        var entity = PrizeInfoDTO.toEntity(dto, dto.getTopicId());
 
         var id = prizeInfoServer.saveOrUpdate(entity);
         if (Objects.isNull(id))
@@ -47,14 +47,14 @@ public class PrizeInfoController {
      */
     @PostMapping("/save-batch")
     @ResponseFormat
-    public Boolean saveList(@RequestBody List<PrizeInfoDTO> dtos) {
-        if (CollectionUtils.isEmpty(dtos))
-            throw BusinessException.newInstance("缺少参数");
-
-        var entity = dtos.stream()
-                .map(PrizeInfoDTO::toEntity)
-                .collect(Collectors.toList());
-        return prizeInfoServer.saveOrUpdateList(entity);
+    public Boolean saveList(@RequestBody List<PrizeInfoDTO> dtos, @RequestParam Long topicId) {
+        List<PrizeInfoEntity> entity = List.of();
+        if (!CollectionUtils.isEmpty(dtos)) {
+            entity = dtos.stream()
+                    .map(s -> PrizeInfoDTO.toEntity(s, topicId))
+                    .collect(Collectors.toList());
+        }
+        return prizeInfoServer.saveOrUpdateList(entity, topicId);
     }
 
     /**
@@ -62,14 +62,14 @@ public class PrizeInfoController {
      */
     @PostMapping("/update-batch")
     @ResponseFormat
-    public Boolean updateList(@RequestBody List<PrizeInfoDTO> dtos) {
-        if (CollectionUtils.isEmpty(dtos))
-            throw BusinessException.newInstance("缺少参数");
-
-        var entity = dtos.stream()
-                .map(PrizeInfoDTO::toEntity)
-                .collect(Collectors.toList());
-        return prizeInfoServer.saveOrUpdateList(entity);
+    public Boolean updateList(@RequestBody List<PrizeInfoDTO> dtos, @RequestParam Long topicId) {
+        List<PrizeInfoEntity> entity = List.of();
+        if (!CollectionUtils.isEmpty(dtos)) {
+            entity = dtos.stream()
+                    .map(s -> PrizeInfoDTO.toEntity(s, topicId))
+                    .collect(Collectors.toList());
+        }
+        return prizeInfoServer.saveOrUpdateList(entity, topicId);
     }
 
     /**
@@ -78,7 +78,7 @@ public class PrizeInfoController {
     @PutMapping
     @ResponseFormat
     public void update(@RequestBody PrizeInfoDTO dto) {
-        var entity = PrizeInfoDTO.toEntity(dto);
+        var entity = PrizeInfoDTO.toEntity(dto, dto.getTopicId());
 
         if (Objects.isNull(entity.getId()))
             throw BusinessException.newInstance("缺少id参数");
