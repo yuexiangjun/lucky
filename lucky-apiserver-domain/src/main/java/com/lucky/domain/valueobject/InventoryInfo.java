@@ -43,6 +43,6 @@ public class InventoryInfo {
 	/**
 	 * 获取概率
 	 */
-	private BigDecimal probability;
+	private  String  probability;
 
 }
