@@ -77,6 +77,7 @@ public class SessionInfoServer {
                                     .prizeName(s.getPrizeName())
                                     .gradeName(gradeEntity.getName())
                                     .sort(gradeEntity.getSort())
+                                    .probability(gradeEntity.getProbability())
                                     .build();
                         }
                 )
