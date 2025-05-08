@@ -1,5 +1,6 @@
 package com.lucky.domain;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.lucky.domain.entity.SessionInfoEntity;
 import com.lucky.domain.repository.SessionInfoRepository;
 import com.lucky.domain.valueobject.BaseDataPage;
@@ -37,8 +38,9 @@ public class SessionInfoService {
 		List<SessionInfoEntity> sessionInfoEntities = new ArrayList<>();
 
 		for (Integer i = 0; i < number; i++) {
-			sessionInfoEntity.setSessionNumber(i + 1);
-			sessionInfoEntities.add(sessionInfoEntity);
+			SessionInfoEntity bean = BeanUtil.toBean(sessionInfoEntity, SessionInfoEntity.class);
+			bean.setSessionNumber(i + 1);
+			sessionInfoEntities.add(bean);
 		}
 
 		return sessionInfoRepository.saveList(sessionInfoEntities);
