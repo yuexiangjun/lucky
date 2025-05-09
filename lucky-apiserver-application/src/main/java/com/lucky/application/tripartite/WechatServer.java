@@ -80,7 +80,7 @@ public class WechatServer {
 
     private static String getToken(WechatUserEntity wechatUserEntity) {
         var tokenEntity = TokenEntity.builder()
-                .userId(String.valueOf(wechatUserEntity.getOpenid()))
+                .userId(String.valueOf(wechatUserEntity.getId()))
                 .username(wechatUserEntity.getOpenid())
                 .client(2)
                 .createTime(String.valueOf(System.currentTimeMillis()))
