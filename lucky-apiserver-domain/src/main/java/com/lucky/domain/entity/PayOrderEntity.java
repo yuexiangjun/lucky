@@ -24,6 +24,15 @@ public class PayOrderEntity {
 	 */
 	private BigDecimal payMoney;
 	/**
+	 * 支付类型 1 微信支付 2：平台积分支付
+	 */
+	private Integer payType;
+	/**
+	 * 订单类型 1 抽奖订单 2：充值订单
+	 */
+	private Integer orderType;
+
+	/**
 	 * 支付状态 0 未支付 1 已支付 2：支付失败
 	 */
 	private Integer payStatus;
@@ -58,7 +67,7 @@ public class PayOrderEntity {
 	/**
 	 * 三方支付id
 	 */
-	private String ThirdPayId;
+	private String thirdPayId;
 	/**
 	 * 商品id
 	 */

@@ -218,4 +218,53 @@ public class LotteryServer {
                 .concat(String.valueOf(sessionId));
         return key;
     }
+
+    public PayInfo balancePay(PayOrderEntity entity) {
+//
+//        this.verifySession(entity.getSessionId());
+//
+//        var key = getRedisKey(entity);
+//        //获取是否本场有人在操作
+//        String cacheObject = redisService.getCacheObject(key);
+//
+//        if (Objects.nonNull(cacheObject) && !Objects.equals(cacheObject, String.valueOf(entity.getWechatUserId()))) {
+//            throw BusinessException.newInstance("本场有人在操作,请稍等...");
+//        }
+//
+//        var lock = redissionConfig.redissonClient().getLock(key);
+//        lock.lock();
+//        try {
+//            //获取支付金额
+//            var seriesTopic = topicService.findById(entity.getTopicId());
+//
+//            var totalMoney = seriesTopic.getPrice().multiply(BigDecimal.valueOf(entity.getTimes()));
+//
+//            entity.setPayMoney(totalMoney);
+//            entity.setPayStatus(0);
+//            entity.setPayTime(LocalDateTime.now());
+//
+//            var payOrderId = payOrderService.saveOrUpdate(entity);
+//
+//            var wechatUserEntity = wechatUserService.getById(entity.getWechatUserId());
+//            //调取三方支付接口
+//            var payOrderPram = PayOrderPram.getInstance(payOrderId, totalMoney, wechatUserEntity.getOpenid());
+//            var pay = weChatPayServer.pay(payOrderPram);
+//
+//            entity.setId(payOrderId);
+//            entity.setPayParams(JSONObject.toJSONString(pay.getPayParams()));
+//
+//            payOrderService.saveOrUpdate(entity);
+//
+//            return PayInfo.builder()
+//                    .payOrderId(payOrderId)
+//                    .payParams(pay.getPayParams())
+//                    .build();
+//
+//        } finally {
+//            if (lock.isLocked())
+//                lock.unlock();
+//        }
+
+        return null;
+    }
 }

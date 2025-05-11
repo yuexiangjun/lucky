@@ -28,6 +28,10 @@ public class OrderEntity {
 	 */
 	private Long sessionId;
 	/**
+	 * 支付订单id
+	 */
+	private Long payOrderId;
+	/**
 	 * 商品id
 	 */
 	private Long productId;

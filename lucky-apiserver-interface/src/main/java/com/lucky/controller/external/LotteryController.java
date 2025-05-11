@@ -59,14 +59,24 @@ public class LotteryController {
     }
 
     /**
-     * 支付
+     * 微信支付
      */
-    @PostMapping("/pay")
+    @PostMapping("/tripartite-pay")
     @ResponseFormat
     public PayInfo pay(@RequestBody PayDTO dto) {
 
         return lotteryServer.pay(PayDTO.toEntity(dto));
     }
+    /**
+     * 账户积分支付
+     */
+    @PostMapping("/balance-pay")
+    @ResponseFormat
+    public PayInfo balancePay(@RequestBody PayDTO dto) {
+
+        return lotteryServer.balancePay(PayDTO.toEntity(dto));
+    }
+
 
     /**
      * 支付成功后 获取抽取的奖品

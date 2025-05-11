@@ -67,11 +67,13 @@ public class OrderService {
     public Boolean saveBatch(List<Long> prizeIds,
                              Long topicId,
                              Long sessionId,
-                             Long wechatUserId) {
+                             Long wechatUserId,
+                             Long payOrderId) {
 
         var orderEntities = prizeIds.stream()
                 .map(s -> OrderEntity.builder()
                         .productId(s)
+                        .payOrderId(payOrderId)
                         .topicId(topicId)
                         .sessionId(sessionId)
                         .wechatUserId(wechatUserId)

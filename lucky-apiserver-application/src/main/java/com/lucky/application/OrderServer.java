@@ -202,7 +202,8 @@ public class OrderServer {
             orderService.saveBatch(prizeIds,
                     payOrderEntity.getTopicId(),
                     payOrderEntity.getSessionId(),
-                    payOrderEntity.getWechatUserId());
+                    payOrderEntity.getWechatUserId(),
+                    payOrderEntity.getId());
 
             payOrderEntity.setPrizeId(prizeIds);
 
@@ -400,5 +401,9 @@ public class OrderServer {
                 .topicName(seriesTopicEntity.getName())
                 .actualProfit(actualProfit)
                 .build();
+    }
+
+    public List<PrizePublicity> prizePublicity(Integer gradeType, Integer gradeType1) {
+        return null;
     }
 }

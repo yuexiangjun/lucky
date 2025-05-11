@@ -38,6 +38,15 @@ public class PayOrderPO {
 	 */
 	private Integer payStatus;
 	/**
+	 * 支付类型 1 微信支付 2：平台积分支付
+	 */
+	private Integer payType;
+	/**
+	 * 订单类型 1 抽奖订单 2：充值订单
+	 */
+	private Integer orderType;
+
+	/**
 	 * 支付人
 	 */
 	private Long wechatUserId;
