@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -38,4 +40,9 @@ public class InventoryInfo {
 	 * 排序
 	 */
 	private Integer sort;
+	/**
+	 * 获取概率
+	 */
+	private  String  probability;
+
 }

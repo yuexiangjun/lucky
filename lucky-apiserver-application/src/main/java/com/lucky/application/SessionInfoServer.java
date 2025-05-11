@@ -12,6 +12,7 @@ import com.lucky.domain.valueobject.SessionInfo;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -71,12 +72,15 @@ public class SessionInfoServer {
                 .map(s -> {
                             GradeEntity gradeEntity = gradeEntityMap.get(s.getGradeId());
 
+                            var probability = Objects.isNull(gradeEntity.getProbability()) ? BigDecimal.ZERO : gradeEntity.getProbability().multiply(BigDecimal.valueOf(1000));
+
                             return InventoryInfo.builder()
                                     .prizeId(s.getId())
                                     .prizeUrl(s.getPrizeUrl())
                                     .prizeName(s.getPrizeName())
                                     .gradeName(gradeEntity.getName())
                                     .sort(gradeEntity.getSort())
+                                    .probability(probability.toPlainString().concat("‰"))
                                     .build();
                         }
                 )
@@ -93,14 +97,19 @@ public class SessionInfoServer {
         var totalInventoryMap = prizeInfoEntities.stream()
                 .collect(Collectors.toMap(PrizeInfoEntity::getId, PrizeInfoEntity::getInventory));
 
+
         var sessionInfoList = dataList.stream()
                 .map(s -> {
+                    Integer remainInventory = s.totalInventory();
+
                     var inventoryInfos = s.getPrizeInventory()
                             .stream()
                             .map(p -> {
 
                                 PrizeInfoEntity prizeInfoEntity = prizeInfoEntityMap.get(p.getPrizeId());
                                 GradeEntity gradeEntity = gradeEntityMap.get(prizeInfoEntity.getGradeId());
+
+                                var probability = new BigDecimal(p.getInventory()).divide(new BigDecimal(remainInventory), 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100));
                                 return InventoryInfo.builder()
                                         .prizeId(p.getPrizeId())
                                         .totalInventory(totalInventoryMap.get(p.getPrizeId()))
@@ -108,6 +117,7 @@ public class SessionInfoServer {
                                         .prizeUrl(prizeInfoEntity.getPrizeUrl())
                                         .prizeName(prizeInfoEntity.getPrizeName())
                                         .gradeName(gradeEntity.getName())
+                                        .probability(probability.toPlainString().concat("%"))
                                         .sort(gradeEntity.getSort())
                                         .build();
                             })
@@ -117,11 +127,12 @@ public class SessionInfoServer {
                         inventoryInfos.addAll(hides);
                     }
                     inventoryInfos.sort(Comparator.comparingInt(InventoryInfo::getSort));
+
                     return SessionInfo.builder()
                             .id(s.getId())
                             .totalInventory(totalInventory)
                             .sessionNumber(s.getSessionNumber())
-                            .remainInventory(s.totalInventory())
+                            .remainInventory(remainInventory)
                             .inventoryInfos(inventoryInfos)
                             .build();
 
