@@ -8,6 +8,7 @@ import com.lucky.domain.entity.OrderPrizeEntity;
 import com.lucky.domain.repository.OrderPrizeRepository;
 import com.lucky.infrastructure.repository.mysql.mapper.OrderPrizeMapper;
 import com.lucky.infrastructure.repository.mysql.po.OrderPrizePO;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * 订单关联商品
  */
-
+@Component
 public class OrderPrizeRepositoryImpl extends ServiceImpl<OrderPrizeMapper, OrderPrizePO> implements OrderPrizeRepository {
 
     @Override
