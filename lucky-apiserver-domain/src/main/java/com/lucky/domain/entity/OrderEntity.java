@@ -31,10 +31,7 @@ public class OrderEntity {
 	 * 支付订单id
 	 */
 	private Long payOrderId;
-	/**
-	 * 商品id
-	 */
-	private Long productId;
+
 	/**
 	 * 订单状态  0-待发货 1-待收货 2-完成
 	 */
@@ -51,6 +48,10 @@ public class OrderEntity {
 	 * 发货时间
 	 */
 	private LocalDateTime sendTime;
+	/**
+	 * 商品
+	 */
+	private List<OrderPrizeEntity> orderPrizeEntities;
 
 
 

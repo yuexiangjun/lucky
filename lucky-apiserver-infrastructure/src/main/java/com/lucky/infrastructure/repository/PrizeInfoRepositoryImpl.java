@@ -101,4 +101,17 @@ public class PrizeInfoRepositoryImpl extends ServiceImpl<PrizeInfoMapper, PrizeI
         }
         return true;
     }
+
+    @Override
+    public List<PrizeInfoEntity> findByGradeIds(List<Long> gradeIds) {
+        if (CollectionUtils.isEmpty(gradeIds))
+            return List.of();
+
+        var wrapper = Wrappers.lambdaQuery(PrizeInfoPO.class)
+                .in(PrizeInfoPO::getGradeId, gradeIds);
+        return prizeInfoMapper.selectList(wrapper)
+                .stream()
+                .map(PrizeInfoPO::toEntity)
+                .collect(Collectors.toList());
+    }
 }

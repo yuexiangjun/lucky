@@ -78,7 +78,7 @@ public class RedisService {
      * @return 有效时间
      */
     public long getExpire(final String key) {
-        return redisTemplate.getExpire(key);
+        return redisTemplate.getExpire(key, TimeUnit.SECONDS);
     }
 
     /**

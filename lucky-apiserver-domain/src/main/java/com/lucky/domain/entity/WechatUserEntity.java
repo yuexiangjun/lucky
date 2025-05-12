@@ -2,6 +2,7 @@ package com.lucky.domain.entity;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -30,7 +31,10 @@ public class WechatUserEntity {
 	 * 手机号码
 	 */
 	private String phone;
-
+	/**
+	 * 账户余额
+	 */
+	private BigDecimal balance;
 
 	/**
 	 * 是否启用

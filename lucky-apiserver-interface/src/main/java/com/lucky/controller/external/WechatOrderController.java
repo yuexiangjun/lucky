@@ -34,7 +34,7 @@ public class WechatOrderController extends BaseController {
 
 
     /**
-     * 抽奖记录/我的列表
+     * 抽奖记录
      */
     @PostMapping("/list")
     @ResponseFormat
@@ -56,11 +56,10 @@ public class WechatOrderController extends BaseController {
     @ResponseFormat
     public List<PrizePublicityVO> prizePublicity(@RequestBody PrizePublicityDTO dto) {
 
-         var publicityList = orderServer.prizePublicity(dto.getGradeType(), dto.getGradeType());
+         var publicityList = orderServer.prizePublicity(dto.getGradeType(),dto.getTopicId());
         return publicityList.stream()
                 .map(PrizePublicityVO::toVO)
                 .collect(Collectors.toList());
-
     }
 
 

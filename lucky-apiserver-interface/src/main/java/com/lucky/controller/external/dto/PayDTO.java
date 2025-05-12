@@ -25,23 +25,28 @@ public class PayDTO {
      * 抽奖次数
      */
     private Integer times;
-    /**
-     * 支付类型 1 微信支付 2：平台积分支付
-     */
-    private Integer payType;
-    /**
-     * 订单类型 1 抽奖订单 2：充值订单
-     */
-    private Integer orderType=1;
 
 
-    public static PayOrderEntity toEntity(PayDTO dto) {
+
+    public static PayOrderEntity toTripartiteEntity(PayDTO dto) {
         if (Objects.isNull(dto))
             throw BusinessException.newInstance("缺少参数");
-        return BeanUtil.toBean(dto, PayOrderEntity.class);
+         var bean = BeanUtil.toBean(dto, PayOrderEntity.class);
+        bean.setPayType(1);
+        bean.setOrderType(1);
+        return bean;
 
 
     }
 
 
+    public static PayOrderEntity toBalanceEntity(PayDTO dto) {
+        if (Objects.isNull(dto))
+            throw BusinessException.newInstance("缺少参数");
+        var bean = BeanUtil.toBean(dto, PayOrderEntity.class);
+        bean.setPayType(2);
+        bean.setOrderType(1);
+        return bean;
+
+    }
 }

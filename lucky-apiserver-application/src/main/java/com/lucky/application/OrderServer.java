@@ -26,6 +26,7 @@ public class OrderServer {
     private final SeriesTopicService seriesTopicService;
     private final WechatUserService wechatUserService;
     private final SessionInfoService sessionInfoService;
+
     private final RedissionConfig redissionConfig;
     private final static String DEDUCTION = "DEDUCTION:";
 
@@ -75,7 +76,12 @@ public class OrderServer {
 
         //商品id
         var productIds = dataList.stream()
-                .map(OrderEntity::getProductId)
+                .map(s -> s.getOrderPrizeEntities()
+                        .stream()
+                        .map(OrderPrizeEntity::getProductId)
+                        .collect(Collectors.toList())
+                )
+                .flatMap(List::stream)
                 .collect(Collectors.toList());
 
         var wechatUserIds = dataList.stream()
@@ -108,22 +114,29 @@ public class OrderServer {
                 orderEntityPage.getTotal(),
                 orderEntityPage.getPages(),
                 dataList.stream()
-                        .map(orderEntity -> {
-                            var prizeInfoEntity = prizeInfoMap.get(orderEntity.getProductId());
-                            return Order
-                                    .builder()
-                                    .id(orderEntity.getId())
-                                    .finishTime(orderEntity.getFinishTime())
-                                    .createTime(orderEntity.getCreateTime())
-                                    .sendTime(orderEntity.getSendTime())
-                                    .status(orderEntity.getStatus())
-                                    .wechatName(wechatUserMap.get(orderEntity.getWechatUserId()))
-                                    .topicName(seriesTopicByName.get(orderEntity.getTopicId()))
-                                    .productName(prizeInfoEntity.getPrizeName())
-                                    .productUrl(prizeInfoEntity.getPrizeUrl())
-                                    .sessionName(gradeEntityByName.get(prizeInfoEntity.getGradeId()))
-                                    .build();
-                        })
+                        .map(orderEntity ->
+                                orderEntity.getOrderPrizeEntities()
+                                        .stream()
+                                        .map(orderPrizeEntity -> {
+
+                                            var prizeInfoEntity = prizeInfoMap.get(orderPrizeEntity.getProductId());
+                                            return Order
+                                                    .builder()
+                                                    .id(orderEntity.getId())
+                                                    .finishTime(orderEntity.getFinishTime())
+                                                    .createTime(orderEntity.getCreateTime())
+                                                    .sendTime(orderEntity.getSendTime())
+                                                    .status(orderEntity.getStatus())
+                                                    .wechatName(wechatUserMap.get(orderEntity.getWechatUserId()))
+                                                    .topicName(seriesTopicByName.get(orderEntity.getTopicId()))
+                                                    .productName(prizeInfoEntity.getPrizeName())
+                                                    .productUrl(prizeInfoEntity.getPrizeUrl())
+                                                    .sessionName(gradeEntityByName.get(prizeInfoEntity.getGradeId()))
+                                                    .build();
+                                        }).collect(Collectors.toList())
+
+                        )
+                        .flatMap(List::stream)
                         .collect(Collectors.toList()));
 
     }
@@ -164,7 +177,7 @@ public class OrderServer {
                     .reduce(0, Integer::sum);
 
             if (commonInventory < payOrderEntity.getTimes())
-                throw BusinessException.newInstance("次数小于库存");
+                throw BusinessException.newInstance("库存小于次数");
 
             var prizeInventory = sessionInfoEntity.getPrizeInventory();
             //抽中的奖品id
@@ -199,7 +212,7 @@ public class OrderServer {
 
             sessionInfoService.saveOrUpdate(sessionInfoEntity);
 
-            orderService.saveBatch(prizeIds,
+            orderService.save(prizeIds,
                     payOrderEntity.getTopicId(),
                     payOrderEntity.getSessionId(),
                     payOrderEntity.getWechatUserId(),
@@ -383,7 +396,11 @@ public class OrderServer {
         var costPrice = orderEntityList
                 .stream()
                 .map(orderEntity ->
-                        prizeMapPrice.getOrDefault(orderEntity.getProductId(), BigDecimal.ZERO)
+                        orderEntity.getOrderPrizeEntities()
+                                .stream()
+                                .map(orderPrizeEntity -> prizeMapPrice.get(orderPrizeEntity.getProductId()))
+                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+
                 )
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         //销售单量
@@ -403,7 +420,70 @@ public class OrderServer {
                 .build();
     }
 
-    public List<PrizePublicity> prizePublicity(Integer gradeType, Integer gradeType1) {
-        return null;
+    public List<PrizePublicity> prizePublicity(Integer gradeType, Long topicId) {
+
+        var gradeEntities = gradeService.findByList(GradeEntity.builder().type(gradeType).build());
+
+        if (CollectionUtils.isEmpty(gradeEntities))
+            return Collections.emptyList();
+
+        var gradeIds = gradeEntities.stream()
+                .map(GradeEntity::getId)
+                .collect(Collectors.toList());
+
+        var prizeInfoEntities = prizeInfoService.findByGradeIds(gradeIds);
+
+        if (CollectionUtils.isEmpty(prizeInfoEntities))
+            return Collections.emptyList();
+
+        var prizeInfoIds = prizeInfoEntities
+                .stream()
+                .filter(s -> {
+                    if (Objects.isNull(topicId))
+                        return Objects.equals(s.getTopicId(), topicId);
+                    return true;
+                })
+                .map(PrizeInfoEntity::getId)
+                .collect(Collectors.toList());
+
+        var topicIds = prizeInfoEntities.stream()
+                .map(PrizeInfoEntity::getTopicId)
+                .collect(Collectors.toList());
+
+        var prizeInfoEntityMap = prizeInfoEntities.stream()
+                .collect(Collectors.toMap(PrizeInfoEntity::getId, Function.identity()));
+
+        var seriesTopicMap = seriesTopicService.findByIds(topicIds)
+                .stream()
+                .collect(Collectors.toMap(SeriesTopicEntity::getId, Function.identity()));
+
+
+        var orderPrizeEntities = orderService.findByPrizeIds(prizeInfoIds);
+
+        if (CollectionUtils.isEmpty(orderPrizeEntities))
+            return Collections.emptyList();
+
+        var wechatUserIds = orderPrizeEntities.stream()
+                .map(OrderPrizeEntity::getWechatUserId)
+                .collect(Collectors.toList());
+
+        var wechatUserMap = wechatUserService.getByIds(wechatUserIds)
+                .stream()
+                .collect(Collectors.toMap(WechatUserEntity::getId, Function.identity()));
+
+        return orderPrizeEntities
+                .stream()
+                .map(s -> {
+                    var wechatUserEntity = wechatUserMap.get(s.getWechatUserId());
+                    var prizeInfoEntity = prizeInfoEntityMap.get(s.getProductId());
+                    return PrizePublicity.builder()
+                            .name(wechatUserEntity.getName())
+                            .avatar(wechatUserEntity.getAvatar())
+                            .seriesName(seriesTopicMap.get(prizeInfoEntity.getTopicId()).getName())
+                            .prizeName(prizeInfoEntity.getPrizeName())
+                            .time(s.getCreateTime())
+                            .build();
+                }).collect(Collectors.toList());
+
     }
 }

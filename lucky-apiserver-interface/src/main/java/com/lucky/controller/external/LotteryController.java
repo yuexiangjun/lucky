@@ -59,22 +59,23 @@ public class LotteryController {
     }
 
     /**
+     * 获取控场时间
+     */
+    @GetMapping("/buy/control-time")
+    @ResponseFormat
+    public Integer getControlTime(@RequestParam("topicId") Long topicId,
+                                  @RequestParam("sessionId") Long sessionId) {
+        return lotteryServer.getControlTime(topicId, sessionId);
+    }
+
+    /**
      * 微信支付
      */
     @PostMapping("/tripartite-pay")
     @ResponseFormat
     public PayInfo pay(@RequestBody PayDTO dto) {
 
-        return lotteryServer.pay(PayDTO.toEntity(dto));
-    }
-    /**
-     * 账户积分支付
-     */
-    @PostMapping("/balance-pay")
-    @ResponseFormat
-    public PayInfo balancePay(@RequestBody PayDTO dto) {
-
-        return lotteryServer.balancePay(PayDTO.toEntity(dto));
+        return lotteryServer.pay(PayDTO.toTripartiteEntity(dto));
     }
 
 
@@ -89,6 +90,20 @@ public class LotteryController {
                 .map(SuccessProductsVO::getInstance)
                 .collect(Collectors.toList());
 
+    }
+
+
+    /**
+     * 账户积分支付
+     */
+    @PostMapping("/balance-pay")
+    @ResponseFormat
+    public List<SuccessProductsVO> balancePay(@RequestBody PayDTO dto) {
+
+        return lotteryServer.balancePay(PayDTO.toBalanceEntity(dto))
+                .stream()
+                .map(SuccessProductsVO::getInstance)
+                .collect(Collectors.toList());
     }
 
     /**
