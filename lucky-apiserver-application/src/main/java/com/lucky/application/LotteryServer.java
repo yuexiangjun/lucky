@@ -218,7 +218,7 @@ public class LotteryServer {
                 .concat(String.valueOf(sessionId));
         return key;
     }
-
+@Transactional (rollbackFor = Exception.class)
     public List<SuccessProducts> balancePay(PayOrderEntity entity) {
 
         this.verifySession(entity.getSessionId());

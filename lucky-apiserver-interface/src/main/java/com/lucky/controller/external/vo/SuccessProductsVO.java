@@ -16,7 +16,7 @@ public class SuccessProductsVO {
     /**
      * 奖品等级
      */
-    private Long gradeName;
+    private String gradeName;
     /**
      * 奖品名称
      */
