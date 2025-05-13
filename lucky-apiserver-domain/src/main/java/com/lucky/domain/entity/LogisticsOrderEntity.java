@@ -3,6 +3,7 @@ package com.lucky.domain.entity;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 物流订单
@@ -18,6 +19,10 @@ public class LogisticsOrderEntity {
      * id
      */
     private Long id;
+    /**
+     * 用户
+     */
+    private Long wechatUserId;
     /**
      * 编号
      */
@@ -46,5 +51,9 @@ public class LogisticsOrderEntity {
      * 物流地址
      */
     private DeliveryAddressEntity address;
+    /**
+     * 商品
+     */
+    private List<LogisticsOrderPrizeEntity> goods;
 
 }

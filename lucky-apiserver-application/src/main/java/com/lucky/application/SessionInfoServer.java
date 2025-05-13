@@ -2,6 +2,7 @@ package com.lucky.application;
 
 import com.lucky.domain.GradeService;
 import com.lucky.domain.PrizeInfoService;
+import com.lucky.domain.RedisService;
 import com.lucky.domain.SessionInfoService;
 import com.lucky.domain.entity.GradeEntity;
 import com.lucky.domain.entity.PrizeInfoEntity;
@@ -25,13 +26,15 @@ public class SessionInfoServer {
     private final SessionInfoService sessionInfoService;
     private final PrizeInfoService prizeInfoService;
     private final GradeService gradeService;
+    private final RedisService redisService;
 
     public SessionInfoServer(SessionInfoService sessionInfoService,
                              PrizeInfoService prizeInfoService,
-                             GradeService gradeService) {
+                             GradeService gradeService, RedisService redisService) {
         this.sessionInfoService = sessionInfoService;
         this.prizeInfoService = prizeInfoService;
         this.gradeService = gradeService;
+        this.redisService = redisService;
     }
 
     /**
@@ -42,7 +45,9 @@ public class SessionInfoServer {
         var sessionInfoEntityPage = sessionInfoService.findByTopicIdPageNO(topicId, page, size);
 
 
-        return this.getSessionInfoBaseDataPage(topicId, sessionInfoEntityPage);
+        BaseDataPage<SessionInfo> sessionInfoBaseDataPage = this.getSessionInfoBaseDataPage(topicId, sessionInfoEntityPage);
+
+        return sessionInfoBaseDataPage;
 
     }
 
@@ -128,18 +133,23 @@ public class SessionInfoServer {
                     }
                     inventoryInfos.sort(Comparator.comparingInt(InventoryInfo::getSort));
 
+                    long expire = redisService.getExpire(getByBuyKey(topicId, s.getId()));
+
+
                     return SessionInfo.builder()
                             .id(s.getId())
                             .totalInventory(totalInventory)
                             .sessionNumber(s.getSessionNumber())
                             .remainInventory(remainInventory)
                             .inventoryInfos(inventoryInfos)
+                            .endTime(expire >= 0 ? expire : null)
                             .build();
 
 
                 })
 
                 .collect(Collectors.toList());
+
 
         return BaseDataPage.newInstance(
                 sessionInfoEntityPage.getTotal(),
@@ -171,5 +181,11 @@ public class SessionInfoServer {
                 .collect(Collectors.toMap(PrizeInfoEntity::getId, Function.identity(), (v1, v2) -> v1));
     }
 
-
+    private static String getByBuyKey(Long topicId, Long sessionId) {
+        var key = "PAY_LOCK_NAME:".concat("buy:")
+                .concat(String.valueOf(topicId))
+                .concat(":")
+                .concat(String.valueOf(sessionId));
+        return key;
+    }
 }

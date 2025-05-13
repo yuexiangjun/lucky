@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.lucky.domain.entity.OrderPrizeEntity;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -41,6 +42,14 @@ public class OrderPrizePO {
      * 场次id
      */
     private Long sessionId;
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+    /**
+     * 是否发货
+     */
+    private  Boolean isDelivery;
 
     public static OrderPrizePO getInstance(OrderPrizeEntity entity) {
         if (Objects.isNull(entity))
@@ -53,5 +62,6 @@ public class OrderPrizePO {
             return null;
         return BeanUtil.toBean(po, OrderPrizeEntity.class);
     }
+
 
 }

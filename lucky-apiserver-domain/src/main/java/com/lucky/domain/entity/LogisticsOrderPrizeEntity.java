@@ -1,11 +1,17 @@
 package com.lucky.domain.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 物流订单关联商品
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class LogisticsOrderPrizeEntity {
     /**
      * id

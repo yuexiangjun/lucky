@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 public class OrderPrizeRepositoryImpl extends ServiceImpl<OrderPrizeMapper, OrderPrizePO> implements OrderPrizeRepository {
 
     @Override
-    public void saveBatch(List<OrderPrizeEntity> orderPrizeEntities) {
+    public void saveOrUpdateBatch(List<OrderPrizeEntity> orderPrizeEntities) {
         var orderPrizePOS = orderPrizeEntities.stream()
                 .map(s -> OrderPrizePO.getInstance(s))
                 .collect(Collectors.toList());
 
-        this.saveBatch(orderPrizePOS);
+        this.saveOrUpdateBatch(orderPrizePOS);
     }
 
     @Override
@@ -39,11 +39,25 @@ public class OrderPrizeRepositoryImpl extends ServiceImpl<OrderPrizeMapper, Orde
     }
 
     @Override
-    public List<OrderPrizeEntity> findByPrizeIds(List<Long> prizeInfoIds) {
+    public List<OrderPrizeEntity> findByPrizeIds(List<Long> prizeInfoIds,Boolean isDelivery) {
         if (CollectionUtils.isEmpty(prizeInfoIds))
         return List.of();
         var orderPrizePOLambdaQueryWrapper = Wrappers.lambdaQuery(OrderPrizePO.class)
-                .in(OrderPrizePO::getProductId, prizeInfoIds);
+                .in(OrderPrizePO::getProductId, prizeInfoIds)
+                .eq(OrderPrizePO::getIsDelivery, isDelivery);
+        return list(orderPrizePOLambdaQueryWrapper)
+                .stream()
+                .map(OrderPrizePO::toEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderPrizeEntity> findByWechatUserId(Long wechatUserId) {
+
+        var orderPrizePOLambdaQueryWrapper = Wrappers.lambdaQuery(OrderPrizePO.class)
+                .eq(OrderPrizePO::getWechatUserId, wechatUserId)
+                .eq(OrderPrizePO::getIsDelivery, false);
+
         return list(orderPrizePOLambdaQueryWrapper)
                 .stream()
                 .map(OrderPrizePO::toEntity)

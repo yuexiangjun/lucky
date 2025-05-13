@@ -38,6 +38,10 @@ public class OrderPrizeEntity {
      * 创建时间
      */
     private LocalDateTime createTime;
+    /**
+     * 是否发货
+     */
+    private  Boolean isDelivery;
 
 
 }

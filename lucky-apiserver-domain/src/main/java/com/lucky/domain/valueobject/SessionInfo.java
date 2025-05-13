@@ -32,6 +32,10 @@ public class SessionInfo {
 	 * 商品详情
 	 */
 	private List<InventoryInfo> inventoryInfos;
+	/**
+	 * 抽奖结束时间 秒
+	 */
+	private Long endTime;
 
 
 }

@@ -1,18 +1,18 @@
 package com.lucky.domain;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.lucky.domain.entity.OrderEntity;
 import com.lucky.domain.entity.OrderPrizeEntity;
 import com.lucky.domain.exception.BusinessException;
 import com.lucky.domain.repository.OrderPrizeRepository;
 import com.lucky.domain.repository.OrderRepository;
 import com.lucky.domain.valueobject.BaseDataPage;
+import com.lucky.domain.valueobject.PrizeInfoNum;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -148,12 +148,67 @@ public class OrderService {
                         .build()
                 ).collect(Collectors.toList());
 
-        orderPrizeRepository.saveBatch(orderPrizeEntities);
+        orderPrizeRepository.saveOrUpdateBatch(orderPrizeEntities);
 
     }
 
-    public  List<OrderPrizeEntity> findByPrizeIds(List<Long> prizeInfoIds) {
+    public List<OrderPrizeEntity> findByPrizeIds(List<Long> prizeInfoIds) {
 
-      return   orderPrizeRepository .findByPrizeIds(prizeInfoIds);
+        return orderPrizeRepository.findByPrizeIds(prizeInfoIds, false);
+    }
+
+    public List<OrderPrizeEntity> findByWechatUserId(Long wechatUserId) {
+        return orderPrizeRepository.findByWechatUserId(wechatUserId);
+    }
+
+    public List<OrderPrizeEntity> deductionInventory(List<PrizeInfoNum> goods) {
+
+        var prizeInfoNumMap = goods.stream()
+                .collect(Collectors.toMap(PrizeInfoNum::getId, PrizeInfoNum::getNum));
+
+
+        var prizeInfoIds = prizeInfoNumMap.keySet().stream()
+                .collect(Collectors.toList());
+
+        var orderPrizeEntities = orderPrizeRepository.findByPrizeIds(prizeInfoIds, true);
+
+        var deductionOrderPrize = new ArrayList<List<OrderPrizeEntity>>();
+
+        var orderPrizeMap = orderPrizeEntities.stream()
+                .collect(Collectors.groupingBy(OrderPrizeEntity::getProductId));
+
+        for (Map.Entry<Long, List<OrderPrizeEntity>> longListEntry : orderPrizeMap.entrySet()) {
+            //订单商品
+            List<OrderPrizeEntity> value = longListEntry.getValue();
+
+            //扣除数量
+
+            Integer num = prizeInfoNumMap.get(longListEntry.getKey());
+
+            if (num >= value.size()) {
+                deductionOrderPrize.add(value);
+            } else {
+                List<OrderPrizeEntity> collect = value.stream()
+                        .sorted(Comparator.comparing(OrderPrizeEntity::getCreateTime))
+                        .limit(num)
+                        .collect(Collectors.toList());
+
+                deductionOrderPrize.add(collect);
+            }
+
+
+        }
+
+
+        var orderPrizeEntityList = deductionOrderPrize.stream()
+                .filter(CollectionUtil::isNotEmpty)
+                .flatMap(List::stream)
+                .peek(s -> s.setIsDelivery(true))
+                .collect(Collectors.toList());
+        orderPrizeRepository.saveOrUpdateBatch(orderPrizeEntityList);
+
+        return orderPrizeEntityList;
+
+
     }
 }

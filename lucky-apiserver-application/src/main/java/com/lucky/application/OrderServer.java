@@ -8,6 +8,7 @@ import com.lucky.domain.valueobject.*;
 import lombok.Getter;
 import org.redisson.api.RLock;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -27,6 +28,8 @@ public class OrderServer {
     private final WechatUserService wechatUserService;
     private final SessionInfoService sessionInfoService;
 
+    private final LogisticsOrderService logisticsOrderService;
+
     private final RedissionConfig redissionConfig;
     private final static String DEDUCTION = "DEDUCTION:";
 
@@ -34,13 +37,15 @@ public class OrderServer {
                        PrizeInfoService prizeInfoService,
                        GradeService gradeService,
                        SeriesTopicService seriesTopicService,
-                       WechatUserService wechatUserService, SessionInfoService sessionInfoService, RedissionConfig redissionConfig) {
+                       WechatUserService wechatUserService, SessionInfoService sessionInfoService, LogisticsOrderService logisticsOrderService, RedissionConfig redissionConfig) {
         this.orderService = orderService;
         this.prizeInfoService = prizeInfoService;
         this.gradeService = gradeService;
         this.seriesTopicService = seriesTopicService;
         this.wechatUserService = wechatUserService;
         this.sessionInfoService = sessionInfoService;
+
+        this.logisticsOrderService = logisticsOrderService;
         this.redissionConfig = redissionConfig;
     }
 
@@ -484,6 +489,39 @@ public class OrderServer {
                             .time(s.getCreateTime())
                             .build();
                 }).collect(Collectors.toList());
+
+    }
+
+
+    /**
+     * 盒柜
+     */
+    public List<PrizeInfoEntity> boxCabinets(Long wechatUserId) {
+        var orderPrizeEntities = orderService.findByWechatUserId(wechatUserId);
+
+        if (CollectionUtils.isEmpty(orderPrizeEntities))
+            return Collections.emptyList();
+
+        var orderPrizeMap = orderPrizeEntities.stream()
+                .collect(Collectors.groupingBy(OrderPrizeEntity::getProductId));
+
+        var productIds = orderPrizeEntities.stream()
+                .map(OrderPrizeEntity::getProductId)
+                .collect(Collectors.toList());
+
+        var prizeInfoEntities = prizeInfoService.findByIds(productIds);
+        return prizeInfoEntities.stream()
+                .peek(s -> s.setInventory(orderPrizeMap.getOrDefault(s.getId(), List.of()).size()))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void generateLogisticsOrder(LogisticsOrder logisticsOrder) {
+
+        //订单
+         var orderPrizeEntities = orderService.deductionInventory(logisticsOrder.getGoods());
+        logisticsOrderService.generateLogisticsOrder(logisticsOrder.getAddressId(), orderPrizeEntities, logisticsOrder.getWechatUserId());
+
 
     }
 }

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.lucky.domain.entity.WechatUserEntity;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -47,6 +48,10 @@ public class WechatUserPO {
 	 * 最后一次登录时间
 	 */
 	private LocalDateTime lastLoginTime;
+	/**
+	 * 账户余额
+	 */
+	private BigDecimal balance;
 	/**
 	 * 创建时间
 	 */

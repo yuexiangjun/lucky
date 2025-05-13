@@ -2,8 +2,10 @@ package com.lucky.infrastructure.repository.mysql.po;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.lucky.domain.entity.LogisticsOrderEntity;
 import lombok.*;
 
@@ -19,13 +21,17 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@TableName("logistics_order")
+@TableName(value = "logistics_order",autoResultMap = true)
 public class LogisticsOrderPO {
     /**
      * id
      */
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
+    /**
+     * 用户
+     */
+    private Long wechatUserId;
     /**
      * 编号
      */
@@ -53,6 +59,7 @@ public class LogisticsOrderPO {
     /**
      * 物流地址
      */
+    @TableField(typeHandler = JacksonTypeHandler.class)
     private DeliveryAddressPO address;
 
     public static LogisticsOrderPO getInstance(LogisticsOrderEntity entity) {
@@ -60,6 +67,10 @@ public class LogisticsOrderPO {
             return null;
         var bean = BeanUtil.toBean(entity, LogisticsOrderPO.class);
         bean.setAddress(DeliveryAddressPO.getInstance(entity.getAddress()));
+        if (Objects.isNull(bean.getId()))
+            bean.setCreateTime(LocalDateTime.now());
+        else
+            bean.setUpdateTime(LocalDateTime.now());
         return bean;
     }
 

@@ -10,9 +10,11 @@ import java.util.List;
 
 public  interface OrderPrizeRepository {
 
-    void saveBatch(List<OrderPrizeEntity> orderPrizeEntities);
+    void saveOrUpdateBatch(List<OrderPrizeEntity> orderPrizeEntities);
 
     List<OrderPrizeEntity> findByOrderIdIn(List<Long> orderIds);
 
-    List<OrderPrizeEntity> findByPrizeIds(List<Long> prizeInfoIds);
+    List<OrderPrizeEntity> findByPrizeIds(List<Long> prizeInfoIds,Boolean isDelivery);
+
+    List<OrderPrizeEntity> findByWechatUserId(Long wechatUserId);
 }
