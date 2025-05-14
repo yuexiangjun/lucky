@@ -40,6 +40,7 @@ public class WechatTripartiteController {
         var code2Session = wechatServer.code2Session(jsCode);
         return Code2SessionVO.builder()
                 .authorization(code2Session.getAuthorization())
+                .wechatUserId(code2Session.getWechatUserId())
                 .build();
     }
 
