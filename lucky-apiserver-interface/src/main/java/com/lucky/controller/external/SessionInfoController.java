@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SessionInfoController {
 	private final SessionInfoServer SessionInfoServer;
 
-	public SessionInfoController(com.lucky.application.SessionInfoServer sessionInfoServer) {
+	public SessionInfoController(SessionInfoServer sessionInfoServer) {
 		SessionInfoServer = sessionInfoServer;
 	}
 

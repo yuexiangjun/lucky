@@ -1,6 +1,7 @@
 package com.lucky.controller.external;
 
 import com.lucky.application.LogisticsOrderServer;
+import com.lucky.controller.common.BaseController;
 import com.lucky.controller.external.vo.LogisticsOrderInfoVO;
 import com.lucky.domain.entity.LogisticsOrderEntity;
 import com.lucky.utils.ResponseFormat;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -19,7 +21,7 @@ import java.util.stream.Collectors;
  */
 @RequestMapping("/wechat/logistics-order")
 @RestController
-public class WechatLogisticsOrderController {
+public class WechatLogisticsOrderController extends BaseController {
     private final LogisticsOrderServer logisticsOrderServer;
 
     public WechatLogisticsOrderController(LogisticsOrderServer logisticsOrderServer) {
@@ -32,7 +34,11 @@ public class WechatLogisticsOrderController {
      */
     @GetMapping("/list")
     @ResponseFormat
-    public List<LogisticsOrderInfoVO> list(@RequestParam Long wechatUserId, @RequestParam(value = "status", required = false) Integer status) {
+    public List<LogisticsOrderInfoVO> list(@RequestParam(value = "wechatUserId", required = false) Long wechatUserId, @RequestParam(value = "status", required = false) Integer status) {
+
+        if (Objects.isNull(wechatUserId))
+            wechatUserId = this.getWechatUserId();
+
         var logisticsOrderEntity = LogisticsOrderEntity.builder()
                 .wechatUserId(wechatUserId)
                 .status(status)

@@ -2,6 +2,7 @@ package com.lucky.controller.external;
 
 import com.alibaba.fastjson.JSONObject;
 import com.lucky.application.LotteryServer;
+import com.lucky.controller.common.BaseController;
 import com.lucky.controller.external.dto.PayDTO;
 import com.lucky.controller.external.vo.SuccessProductsVO;
 import com.lucky.domain.valueobject.PayInfo;
@@ -9,6 +10,7 @@ import com.lucky.utils.ResponseFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -18,7 +20,7 @@ import java.util.stream.Collectors;
  */
 @RequestMapping("/wechat/pay")
 @RestController
-public class LotteryController {
+public class LotteryController extends BaseController {
     private final LotteryServer lotteryServer;
 
     public LotteryController(LotteryServer lotteryServer) {
@@ -43,8 +45,9 @@ public class LotteryController {
     @ResponseFormat
     public Boolean buy(@RequestParam("topicId") Long topicId,
                        @RequestParam("sessionId") Long sessionId,
-                       @RequestParam("wechatUserId") Long wechatUserId) {
-
+                       @RequestParam(value = "wechatUserId", required = false) Long wechatUserId) {
+        if (Objects.isNull(wechatUserId))
+            wechatUserId = this.getWechatUserId();
         return lotteryServer.buy(topicId, sessionId, wechatUserId);
     }
 
@@ -75,6 +78,9 @@ public class LotteryController {
     @ResponseFormat
     public PayInfo pay(@RequestBody PayDTO dto) {
 
+        if (Objects.isNull(dto.getWechatUserId()))
+            dto.setWechatUserId(this.getWechatUserId());
+
         return lotteryServer.pay(PayDTO.toTripartiteEntity(dto));
     }
 
@@ -99,6 +105,9 @@ public class LotteryController {
     @PostMapping("/balance-pay")
     @ResponseFormat
     public List<SuccessProductsVO> balancePay(@RequestBody PayDTO dto) {
+
+        if (Objects.isNull(dto.getWechatUserId()))
+            dto.setWechatUserId(this.getWechatUserId());
 
         return lotteryServer.balancePay(PayDTO.toBalanceEntity(dto))
                 .stream()

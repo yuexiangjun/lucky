@@ -7,7 +7,6 @@ import com.lucky.controller.external.dto.PrizePublicityDTO;
 import com.lucky.controller.external.vo.PrizePublicityVO;
 import com.lucky.domain.valueobject.BaseDataPage;
 import com.lucky.domain.valueobject.Order;
-import com.lucky.domain.valueobject.PrizePublicity;
 import com.lucky.utils.ResponseFormat;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,10 +39,13 @@ public class WechatOrderController extends BaseController {
     @ResponseFormat
     public BaseDataPage<Order> list(@RequestBody OrderDTO dto) {
 
+        if (Objects.isNull(dto.getWechatUserId()))
+            dto.setWechatUserId(this.getWechatUserId());
+
         var entity = OrderDTO.toEntity(dto);
 
         if (Objects.isNull(entity.getWechatUserId()))
-            entity.setWechatUserId(this.getUserId());
+            entity.setWechatUserId(this.getWechatUserId());
 
         return orderServer.page(entity, dto.getPage(), dto.getSize());
 

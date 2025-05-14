@@ -1,12 +1,14 @@
 package com.lucky.controller.external;
 
 import com.lucky.application.OrderServer;
+import com.lucky.controller.common.BaseController;
 import com.lucky.controller.external.dto.LogisticsOrderDTO;
 import com.lucky.controller.external.vo.WechatPrizeInfoVO;
 import com.lucky.utils.ResponseFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
  */
 @RequestMapping("/wechat/box-cabinets")
 @RestController
-public class BoxCabinetsController {
+public class BoxCabinetsController extends BaseController {
     private final OrderServer orderServer;
 
     public BoxCabinetsController(OrderServer orderServer) {
@@ -28,7 +30,11 @@ public class BoxCabinetsController {
      */
     @ResponseFormat
     @GetMapping("/list")
-    public List<WechatPrizeInfoVO> list(@RequestParam Long wechatUserId) {
+    public List<WechatPrizeInfoVO> list(@RequestParam(value = "wechatUserId", required = false) Long wechatUserId) {
+
+        if (Objects.isNull(wechatUserId))
+            wechatUserId = this.getWechatUserId();
+
         return orderServer.boxCabinets(wechatUserId).stream()
                 .map(WechatPrizeInfoVO::getInstance)
                 .collect(Collectors.toList());
@@ -40,6 +46,10 @@ public class BoxCabinetsController {
     @ResponseFormat
     @PostMapping("/generate-logistics-order")
     public void generateLogisticsOrder(@RequestBody LogisticsOrderDTO dto) {
+
+        if (Objects.isNull(dto.getWechatUserId()))
+            dto.setWechatUserId(this.getWechatUserId());
+
         var logisticsOrder = LogisticsOrderDTO.toLogisticsOrder(dto);
         orderServer.generateLogisticsOrder(logisticsOrder);
     }

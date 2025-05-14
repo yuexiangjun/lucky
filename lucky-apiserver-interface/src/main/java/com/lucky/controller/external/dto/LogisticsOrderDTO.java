@@ -18,6 +18,10 @@ public class LogisticsOrderDTO {
      * 商品
      */
     private List<PrizeInfoNumDTO> goods;
+    /**
+     * 用户
+     */
+    private Long wechatUserId;
 
      public  static LogisticsOrder toLogisticsOrder(LogisticsOrderDTO dto) {
         if (CollectionUtils.isEmpty(dto.getGoods()))
