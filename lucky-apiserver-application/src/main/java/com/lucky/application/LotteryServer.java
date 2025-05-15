@@ -33,6 +33,7 @@ public class LotteryServer {
     private final RedisService redisService;
 
     private final static String PAY_LOCK_NAME = "PAY_LOCK_NAME:";
+    private final static String LOCATION = "LOCATION:";
 
     public LotteryServer(PayOrderService payOrderService, OrderServer orderServer,
                          SeriesTopicService topicService,
@@ -78,8 +79,34 @@ public class LotteryServer {
         if (Objects.nonNull(cacheObject) && !Objects.equals(cacheObject, String.valueOf(wechatUserId))) {
             return false;
         }
-        putRedisKey(key, String.valueOf(wechatUserId));
+        //设置当前场次
+        this.putRedisKey(key, String.valueOf(wechatUserId));
+        //去掉上一场排队信息 设置当前人排队信息
+        this.putLocation(topicId, sessionId, wechatUserId);
         return true;
+    }
+
+    /**
+     * 去掉上一场的排队信息
+     * 设置新得排队信息
+     */
+    private void putLocation(Long topicId, Long sessionId, Long wechatUserId) {
+        var key = LOCATION.concat(wechatUserId.toString());
+
+
+        var cacheObject = redisService.getCacheObject(key);
+        var oldValue = String.valueOf(cacheObject);
+        var split = oldValue.split("-");
+
+        if (split.length == 2) {
+            var topicId1 = Long.valueOf(split[0]);
+            var sessionId1 = Long.valueOf(split[1]);
+
+            this.end(topicId1, sessionId1);
+        }
+
+        var value = String.valueOf(topicId).concat("-").concat(String.valueOf(sessionId));
+        redisService.setCacheObject(key, value);
     }
 
 
@@ -218,7 +245,8 @@ public class LotteryServer {
                 .concat(String.valueOf(sessionId));
         return key;
     }
-@Transactional (rollbackFor = Exception.class)
+
+    @Transactional(rollbackFor = Exception.class)
     public List<SuccessProducts> balancePay(PayOrderEntity entity) {
 
         this.verifySession(entity.getSessionId());
@@ -248,7 +276,7 @@ public class LotteryServer {
             entity.setId(payOrderId);
 
             //TODO：账户余额得扣除
-           wechatUserService.balanceReduce(entity.getWechatUserId(),  totalMoney, "福袋抽奖");
+            wechatUserService.balanceReduce(entity.getWechatUserId(), totalMoney, "福袋抽奖");
 
             //抽取奖品
             var payOrderEntity = orderServer.getByPrizeInfo(entity);
@@ -269,7 +297,7 @@ public class LotteryServer {
 
     }
 
-    public Integer getControlTime(Long topicId, Long sessionId)     {
+    public Integer getControlTime(Long topicId, Long sessionId) {
         long expire = redisService.getExpire(getByBuyKey(topicId, sessionId));
 
         return expire > 0 ? (int) expire : 0;
