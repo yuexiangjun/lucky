@@ -40,12 +40,12 @@ public class SessionInfoServer {
     /**
      * 商品详情
      */
-    public BaseDataPage<SessionInfo> findByTopicIdPageNO(Long topicId, Integer page, Integer size) {
+    public BaseDataPage<SessionInfo> findByTopicIdPageNO(Long topicId, Integer page, Integer size, Long wechatUserId) {
 
         var sessionInfoEntityPage = sessionInfoService.findByTopicIdPageNO(topicId, page, size);
 
 
-        BaseDataPage<SessionInfo> sessionInfoBaseDataPage = this.getSessionInfoBaseDataPage(topicId, sessionInfoEntityPage);
+        BaseDataPage<SessionInfo> sessionInfoBaseDataPage = this.getSessionInfoBaseDataPage(topicId, sessionInfoEntityPage, wechatUserId);
 
         return sessionInfoBaseDataPage;
 
@@ -57,10 +57,12 @@ public class SessionInfoServer {
     public BaseDataPage<SessionInfo> findByTopicIdPageStatus(Long topicId, Integer page, Integer size) {
         var sessionInfoEntityPage = sessionInfoService.findByTopicIdPageStatus(topicId, page, size);
 
-        return this.getSessionInfoBaseDataPage(topicId, sessionInfoEntityPage);
+        return this.getSessionInfoBaseDataPage(topicId, sessionInfoEntityPage, null);
     }
 
-    private BaseDataPage<SessionInfo> getSessionInfoBaseDataPage(Long topicId, BaseDataPage<SessionInfoEntity> sessionInfoEntityPage) {
+    private BaseDataPage<SessionInfo> getSessionInfoBaseDataPage(Long topicId,
+                                                                 BaseDataPage<SessionInfoEntity> sessionInfoEntityPage,
+                                                                 Long wechatUserId) {
         var dataList = sessionInfoEntityPage.getDataList();
 
         if (CollectionUtils.isEmpty(dataList))
@@ -135,6 +137,16 @@ public class SessionInfoServer {
 
                     long expire = redisService.getExpire(getByBuyKey(topicId, s.getId()));
 
+                    Boolean isLineUpSuccess = false;
+                    if (Objects.nonNull(wechatUserId)) {
+                        Object cacheObject = redisService.getCacheObject(getByBuyKey(topicId, s.getId()));
+                        if (Objects.nonNull(cacheObject))
+                            if (Objects.equals(String.valueOf(cacheObject), String.valueOf(wechatUserId)))
+                                isLineUpSuccess = true;
+
+
+                    }
+
 
                     return SessionInfo.builder()
                             .id(s.getId())
@@ -143,6 +155,7 @@ public class SessionInfoServer {
                             .remainInventory(remainInventory)
                             .inventoryInfos(inventoryInfos)
                             .endTime(expire >= 0 ? expire : null)
+                            .isLineUpSuccess(isLineUpSuccess)
                             .build();
 
 
