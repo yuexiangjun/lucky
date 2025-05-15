@@ -42,7 +42,7 @@ public class SessionInfoController  extends BaseController {
 	@GetMapping("/session-list")
 	@ResponseFormat
 	public BaseDataPage<SessionInfo> findByTopicIdPageStatus(@RequestParam Long topicId, @RequestParam Integer page, @RequestParam Integer size) {
-		return SessionInfoServer.findByTopicIdPageStatus(topicId, page, size);
+		return SessionInfoServer.findByTopicIdPageStatus(topicId, page, size,this.getWechatUserId());
 	}
 
 

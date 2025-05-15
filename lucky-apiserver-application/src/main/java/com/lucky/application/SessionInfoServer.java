@@ -54,10 +54,10 @@ public class SessionInfoServer {
     /**
      * 全部场次
      */
-    public BaseDataPage<SessionInfo> findByTopicIdPageStatus(Long topicId, Integer page, Integer size) {
+    public BaseDataPage<SessionInfo> findByTopicIdPageStatus(Long topicId, Integer page, Integer size, Long wechatUserId) {
         var sessionInfoEntityPage = sessionInfoService.findByTopicIdPageStatus(topicId, page, size);
 
-        return this.getSessionInfoBaseDataPage(topicId, sessionInfoEntityPage, null);
+        return this.getSessionInfoBaseDataPage(topicId, sessionInfoEntityPage, wechatUserId);
     }
 
     private BaseDataPage<SessionInfo> getSessionInfoBaseDataPage(Long topicId,
