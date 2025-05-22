@@ -115,7 +115,7 @@ public class OrderServer {
 		var wechatUserMap = wechatUsers.stream()
 				.collect(Collectors.toMap(WechatUserEntity::getId, s -> {
 					if (Strings.isBlank(s.getName())) {
-						return "用户-".concat(s.getPhone().substring(0,3)).concat("***");
+						return "用户-".concat(s.getPhone().substring(0, 3)).concat("***");
 
 					} else return s.getName();
 				}));
@@ -488,7 +488,7 @@ public class OrderServer {
 					var wechatUserEntity = wechatUserMap.get(s.getWechatUserId());
 					var prizeInfoEntity = prizeInfoEntityMap.get(s.getProductId());
 					return PrizePublicity.builder()
-							.name(wechatUserEntity.getName())
+							.name(Strings.isBlank(wechatUserEntity.getName()) ? "用户-".concat(wechatUserEntity.getPhone().substring(0, 3)).concat("***") : wechatUserEntity.getName())
 							.avatar(wechatUserEntity.getAvatar())
 							.seriesName(seriesTopicMap.get(prizeInfoEntity.getTopicId()).getName())
 							.prizeName(prizeInfoEntity.getPrizeName())
