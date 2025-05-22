@@ -27,6 +27,10 @@ public class SessionInfo {
 	 * 本场剩余库存
 	 */
 	private Integer remainInventory;
+	/**
+	 * 场次状态 0：禁用 1：启用 2：结束
+	 */
+	private Integer status;
 
 	/**
 	 * 商品详情
