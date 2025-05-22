@@ -40,6 +40,10 @@ public class SessionInfo {
 	 * 抽奖结束时间 秒
 	 */
 	private Long endTime;
+	/**
+	 * 是否排队成功
+	 */
+	private Boolean isLineUpSuccess;
 
 
 }

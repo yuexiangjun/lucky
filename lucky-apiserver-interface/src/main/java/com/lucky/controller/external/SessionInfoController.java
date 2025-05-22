@@ -1,6 +1,7 @@
 package com.lucky.controller.external;
 
 import com.lucky.application.SessionInfoServer;
+import com.lucky.controller.common.BaseController;
 import com.lucky.domain.valueobject.BaseDataPage;
 import com.lucky.domain.valueobject.SessionInfo;
 import com.lucky.utils.ResponseFormat;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/wechat/detail")
-public class SessionInfoController {
+public class SessionInfoController  extends BaseController {
 	private final SessionInfoServer SessionInfoServer;
 
 	public SessionInfoController(SessionInfoServer sessionInfoServer) {
@@ -30,7 +31,7 @@ public class SessionInfoController {
 	@ResponseFormat
 	public BaseDataPage<SessionInfo> findByTopicIdPageNO(@RequestParam Long topicId, @RequestParam Integer page, @RequestParam Integer size) {
 
-		return SessionInfoServer.findByTopicIdPageNO(topicId, page, size);
+		return SessionInfoServer.findByTopicIdPageNO(topicId, page, size,this.getWechatUserId());
 
 
 	}
@@ -41,7 +42,7 @@ public class SessionInfoController {
 	@GetMapping("/session-list")
 	@ResponseFormat
 	public BaseDataPage<SessionInfo> findByTopicIdPageStatus(@RequestParam Long topicId, @RequestParam Integer page, @RequestParam Integer size) {
-		return SessionInfoServer.findByTopicIdPageStatus(topicId, page, size);
+		return SessionInfoServer.findByTopicIdPageStatus(topicId, page, size,this.getWechatUserId());
 	}
 
 
