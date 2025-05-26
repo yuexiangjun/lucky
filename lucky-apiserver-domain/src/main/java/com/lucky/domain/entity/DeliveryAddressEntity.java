@@ -12,6 +12,10 @@ public class DeliveryAddressEntity {
      */
     private Long id;
     /**
+     * 用户id
+     */
+    private Long wechatUserId;
+    /**
      * 收货人名
      */
     private String name;

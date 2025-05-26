@@ -1,12 +1,14 @@
 package com.lucky.controller.external;
 
 import com.lucky.application.DeliveryAddressServer;
+import com.lucky.controller.common.BaseController;
 import com.lucky.controller.external.dto.DeliveryAddressDTO;
 import com.lucky.controller.external.vo.DeliveryAddressVO;
 import com.lucky.utils.ResponseFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
  */
 @RequestMapping("/wechat/delivery-address")
 @RestController
-public class DeliveryAddressController {
+public class DeliveryAddressController extends BaseController {
     private final DeliveryAddressServer deliveryAddressServer;
 
     public DeliveryAddressController(DeliveryAddressServer deliveryAddressServer) {
@@ -32,7 +34,7 @@ public class DeliveryAddressController {
     @ResponseFormat
     @PostMapping()
     public void saveOrUpdate(@RequestBody DeliveryAddressDTO dto) {
-        var entity = DeliveryAddressDTO.toEntity(dto);
+        var entity = DeliveryAddressDTO.toEntity(dto,this.getWechatUserId());
         deliveryAddressServer.saveOrUpdate(entity);
 
     }
@@ -52,8 +54,8 @@ public class DeliveryAddressController {
      */
     @ResponseFormat
     @GetMapping("/list")
-    public List<DeliveryAddressVO> getByWechatUserId(@RequestParam Long wechatUserId) {
-        return deliveryAddressServer.getByWechatUserId(wechatUserId)
+    public List<DeliveryAddressVO> getByWechatUserId(@RequestParam(required = false) Long wechatUserId) {
+        return deliveryAddressServer.getByWechatUserId(Objects.isNull(wechatUserId)? this.getWechatUserId():wechatUserId)
                 .stream()
                 .map(DeliveryAddressVO::getInstance)
                 .collect(Collectors.toList());
@@ -64,8 +66,8 @@ public class DeliveryAddressController {
      */
     @PutMapping("/default")
     @ResponseFormat
-    public  void  updateDefault(@RequestParam Long id, @RequestParam Long wechatUserId) {
-         deliveryAddressServer.updateDefault(id, wechatUserId);
+    public  void  updateDefault(@RequestParam Long id,@RequestParam(required = false) Long wechatUserId) {
+         deliveryAddressServer.updateDefault(id, Objects.isNull(wechatUserId)? this.getWechatUserId():wechatUserId);
 
     }
 
