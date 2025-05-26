@@ -182,23 +182,30 @@ public class OrderServer {
 			//获取普通级的概率
 			var common = prizeInfoMap.get(2);
 			//获取总库存
-			var commonInventory = common
+			var prizeInventory = sessionInfoEntity.getPrizeInventory();
+			//当前库存
+			var currentInventory = prizeInventory
 					.stream()
-					.map(PrizeInfoEntity::getInventory)
+					.map(Inventory::getInventory)
 					.reduce(0, Integer::sum);
 
-			if (commonInventory < payOrderEntity.getTimes())
+			if (currentInventory < payOrderEntity.getTimes())
 				throw BusinessException.newInstance("库存小于次数");
 
-			var prizeInventory = sessionInfoEntity.getPrizeInventory();
 			//抽中的奖品id
 
 			var prizeIds = new ArrayList<Long>();
 
 
 			for (Integer i = 0; i < payOrderEntity.getTimes(); i++) {
+				//当前库存
+				 currentInventory = prizeInventory
+						.stream()
+						.map(Inventory::getInventory)
+						.reduce(0, Integer::sum);
 
-				var prizeId = this.getaPrizeId(hide, gradeEntityMap, prizeInventory, commonInventory);
+
+				var prizeId = this.getaPrizeId(hide, gradeEntityMap, prizeInventory, currentInventory);
 
 				prizeInventory = prizeInventory
 						.stream()
