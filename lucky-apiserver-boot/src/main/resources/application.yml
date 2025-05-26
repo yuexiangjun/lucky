@@ -27,6 +27,7 @@ huawei:
 wx:
   pay:
     appid:
+    machid:
     mchserialno:
     appsecret:
     apikey:

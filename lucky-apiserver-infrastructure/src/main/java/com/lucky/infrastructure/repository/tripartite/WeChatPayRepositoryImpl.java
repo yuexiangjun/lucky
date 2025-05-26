@@ -44,11 +44,11 @@ public class WeChatPayRepositoryImpl implements WeChatPayRepository {
 
         amount.setTotal(total);
         request.setAmount(amount);
-        request.setAppid(payInfoConfig.getAppId());
+        request.setAppid(payInfoConfig.getAppid());
         Payer payer = new Payer();
-        payer.setOpenid(payInfoConfig.getAppId());
+        payer.setOpenid(payInfoConfig.getAppid());
         request.setPayer(payer);
-        request.setMchid(payInfoConfig.getMchId());
+        request.setMchid(payInfoConfig.getMachid());
         request.setDescription(payOrderPram.getPayDesc());
         request.setNotifyUrl(payInfoConfig.getNotifyhost().concat(payInfoConfig.getNotifyurl()));
         request.setOutTradeNo(String.valueOf(payOrderPram.getPayOrderId()));
@@ -68,7 +68,7 @@ public class WeChatPayRepositoryImpl implements WeChatPayRepository {
         //构建微信支付参数
         // 使用微信支付公钥的RSA配置
         Config config = new RSAAutoCertificateConfig.Builder()
-                .merchantId(payInfoConfig.getMchId())
+                .merchantId(payInfoConfig.getMachid())
                 .privateKeyFromPath(payInfoConfig.getKeypath())
                 .merchantSerialNumber(payInfoConfig.getMchserialno())
                 .apiV3Key(payInfoConfig.getApikey())
@@ -86,7 +86,7 @@ public class WeChatPayRepositoryImpl implements WeChatPayRepository {
         var service = this.getJsapiServiceExtension();
         var request = new QueryOrderByOutTradeNoRequest();
         request.setOutTradeNo(String.valueOf(payOrderId));
-        request.setMchid(payInfoConfig.getMchId());
+        request.setMchid(payInfoConfig.getMachid());
         // 调用接口
         var transaction = service.queryOrderByOutTradeNo(request);
 

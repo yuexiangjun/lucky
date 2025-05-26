@@ -1,7 +1,6 @@
 package com.lucky.infrastructure.repository.config;
 
 import lombok.Data;
-import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +11,9 @@ import org.springframework.stereotype.Component;
 public class PayInfoConfig {
 
     //小程序appid
-    private String appId;
+    private String appid;
     //商户号
-    private String mchId;
+    private String machid;
     //证书序列号
     private String mchserialno;
 
