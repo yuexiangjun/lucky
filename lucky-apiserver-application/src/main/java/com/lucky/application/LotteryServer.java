@@ -79,10 +79,10 @@ public class LotteryServer {
         if (Objects.nonNull(cacheObject) && !Objects.equals(cacheObject, String.valueOf(wechatUserId))) {
             return false;
         }
-        //设置当前场次
-        this.putRedisKey(key, String.valueOf(wechatUserId));
         //去掉上一场排队信息 设置当前人排队信息
         this.putLocation(topicId, sessionId, wechatUserId);
+        //设置当前场次
+        this.putRedisKey(key, String.valueOf(wechatUserId));
         return true;
     }
 
