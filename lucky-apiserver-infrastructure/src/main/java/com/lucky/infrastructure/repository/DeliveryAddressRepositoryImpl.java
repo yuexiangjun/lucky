@@ -41,7 +41,9 @@ public class DeliveryAddressRepositoryImpl extends ServiceImpl<DeliveryAddressMa
     @Override
     public List<DeliveryAddressEntity> getByWechatUserId(Long wechatUserId) {
         var eq = Wrappers.lambdaQuery(DeliveryAddressPO.class)
-                .eq(DeliveryAddressPO::getWechatUserId, wechatUserId);
+                .eq(DeliveryAddressPO::getWechatUserId, wechatUserId)
+                .orderByDesc(DeliveryAddressPO::getIsDefault)
+                .orderByDesc(DeliveryAddressPO::getId);
         return this.list(eq).stream()
                 .map(DeliveryAddressPO::toEntity)
                 .collect(Collectors.toList());

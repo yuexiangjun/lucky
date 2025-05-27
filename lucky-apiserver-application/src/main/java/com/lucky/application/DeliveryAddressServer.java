@@ -33,6 +33,11 @@ public class DeliveryAddressServer {
         var id = deliveryAddressService.saveOrUpdate(entity);
         if (Objects.isNull(id))
             throw new RuntimeException("添加/修改失败");
+        if (entity.getIsDefault()){
+            var  b= deliveryAddressService.updateDefault(id, entity.getWechatUserId());
+            if (!b)
+                throw new RuntimeException("添加/修改失败");
+        }
     }
 
     ;
