@@ -5,6 +5,7 @@ import com.lucky.controller.admin.dto.OrderDTO;
 import com.lucky.controller.common.BaseController;
 import com.lucky.controller.external.dto.PrizePublicityDTO;
 import com.lucky.controller.external.vo.PrizePublicityVO;
+import com.lucky.controller.external.vo.WechatOrderListVO;
 import com.lucky.domain.valueobject.BaseDataPage;
 import com.lucky.domain.valueobject.Order;
 import com.lucky.utils.ResponseFormat;
@@ -25,44 +26,53 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/wechat/order")
 public class WechatOrderController extends BaseController {
-    private final OrderServer orderServer;
+	private final OrderServer orderServer;
 
-    public WechatOrderController(OrderServer orderServer) {
-        this.orderServer = orderServer;
-    }
+	public WechatOrderController(OrderServer orderServer) {
+		this.orderServer = orderServer;
+	}
 
 
-    /**
-     * 抽奖记录
-     */
-    @PostMapping("/list")
-    @ResponseFormat
-    public BaseDataPage<Order> list(@RequestBody OrderDTO dto) {
+	/**
+	 * 抽奖记录
+	 */
+	@PostMapping("/list")
+	@ResponseFormat
+	public BaseDataPage<Order> list(@RequestBody OrderDTO dto) {
 
-        if (Objects.isNull(dto.getWechatUserId()))
-            dto.setWechatUserId(this.getWechatUserId());
+		if (Objects.isNull(dto.getWechatUserId()))
+			dto.setWechatUserId(this.getWechatUserId());
 
-        var entity = OrderDTO.toEntity(dto);
+		var entity = OrderDTO.toEntity(dto);
 
-        if (Objects.isNull(entity.getWechatUserId()))
-            entity.setWechatUserId(this.getWechatUserId());
+		if (Objects.isNull(entity.getWechatUserId()))
+			entity.setWechatUserId(this.getWechatUserId());
 
-        return orderServer.page(entity, dto.getPage(), dto.getSize());
+		return orderServer.page(entity, dto.getPage(), dto.getSize());
 
-    }
+	}
 
-    /**
-     * 中奖公示
-     */
-    @PostMapping("/prize-publicity")
-    @ResponseFormat
-    public List<PrizePublicityVO> prizePublicity(@RequestBody PrizePublicityDTO dto) {
+	/**
+	 * 中奖公示
+	 */
+	@PostMapping("/prize-publicity")
+	@ResponseFormat
+	public List<PrizePublicityVO> prizePublicity(@RequestBody PrizePublicityDTO dto) {
 
-         var publicityList = orderServer.prizePublicity(dto.getGradeType(),dto.getTopicId());
-        return publicityList.stream()
-                .map(PrizePublicityVO::toVO)
-                .collect(Collectors.toList());
-    }
+		var publicityList = orderServer.prizePublicity(dto.getGradeType(), dto.getTopicId());
+		return publicityList.stream()
+				.map(PrizePublicityVO::toVO)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * 获取抽奖记录
+	 */
+	@PostMapping("/get-prize-info")
+	@ResponseFormat
+	public List<WechatOrderListVO> getPrizeInfo(@RequestBody OrderDTO dto) {
+		return null;
+	}
 
 
 }

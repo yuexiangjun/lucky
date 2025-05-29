@@ -77,4 +77,8 @@ public class WechatUserServer {
     public Long saveOrUpdate(WechatUserEntity wechatUserEntity) {
         return wechatUserService.saveOrUpdate(wechatUserEntity);
     }
+
+    public WechatUserEntity getInfo(Long wechatUserId) {
+        return wechatUserService.getById(wechatUserId);
+    }
 }
