@@ -32,6 +32,7 @@ public class LogisticsOrderDTO {
                 .map(s -> PrizeInfoNum.builder().num(s.getNum()).id(s.getId()).build())
                 .collect(Collectors.toList());
         return LogisticsOrder.builder()
+                .wechatUserId(dto.getWechatUserId())
                 .addressId(dto.getAddressId())
                 .goods(prizeInfos)
                 .build();

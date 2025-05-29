@@ -98,7 +98,23 @@ public class LogisticsOrderService {
 
 
     public  List<LogisticsOrderEntity> getByAdminList(LogisticsOrderEntity entity) {
-        return logisticsOrderRepository.getByAdminList(entity);
+         var logisticsOrderEntities = logisticsOrderRepository.getByAdminList(entity);
+        if (CollectionUtil.isEmpty(logisticsOrderEntities))
+            return List.of();
+
+        var logisticsOrderIds = logisticsOrderEntities.stream()
+                .map(LogisticsOrderEntity::getId)
+                .collect(Collectors.toList());
+
+        var logisticsOrderPrizeEntities = logisticsOrderPrizeRepository.getByLogisticsOrderIds(logisticsOrderIds);
+
+        var LogisticsOrderPrizeMap = logisticsOrderPrizeEntities.stream()
+                .collect(Collectors.groupingBy(LogisticsOrderPrizeEntity::getLogisticsOrderId));
+
+
+        return logisticsOrderEntities.stream()
+                .peek(s -> s.setGoods(LogisticsOrderPrizeMap.getOrDefault(s.getId(), List.of())))
+                .collect(Collectors.toList());
 
     }
 }

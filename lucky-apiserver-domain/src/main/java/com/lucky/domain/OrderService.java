@@ -145,6 +145,7 @@ public class OrderService {
                         .wechatUserId(wechatUserId)
                         .productId(s)
                         .sessionId(sessionId)
+                        .createTime(LocalDateTime.now())
                         .build()
                 ).collect(Collectors.toList());
 
@@ -170,7 +171,7 @@ public class OrderService {
         var prizeInfoIds = prizeInfoNumMap.keySet().stream()
                 .collect(Collectors.toList());
 
-        var orderPrizeEntities = orderPrizeRepository.findByPrizeIds(prizeInfoIds, true);
+        var orderPrizeEntities = orderPrizeRepository.findByPrizeIds(prizeInfoIds, false);
 
         var deductionOrderPrize = new ArrayList<List<OrderPrizeEntity>>();
 
