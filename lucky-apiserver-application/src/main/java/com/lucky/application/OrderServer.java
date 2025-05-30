@@ -199,13 +199,13 @@ public class OrderServer {
 
 			for (Integer i = 0; i < payOrderEntity.getTimes(); i++) {
 				//当前库存
-				 currentInventory = prizeInventory
+				currentInventory = prizeInventory
 						.stream()
 						.map(Inventory::getInventory)
 						.reduce(0, Integer::sum);
 
 
-				var prizeId = this.getaPrizeId(hide, gradeEntityMap, prizeInventory, currentInventory);
+				var prizeId = this. getaPrizeId(hide, gradeEntityMap, prizeInventory, currentInventory);
 
 				prizeInventory = prizeInventory
 						.stream()
@@ -218,6 +218,12 @@ public class OrderServer {
 
 				prizeIds.add(prizeId);
 			}
+			//检查是否存在隐藏存在就再补一次普通奖品
+
+			prizeInventory	=this.checkSupplements(prizeIds,hide,prizeInventory);
+
+
+
 			//库存等于0则修改状态为已抽完
 			var reduce = prizeInventory.stream()
 					.map(Inventory::getInventory)
@@ -248,6 +254,54 @@ public class OrderServer {
 
 		}
 
+
+	}
+
+	/**
+	 * 检查是否存在隐藏奖品 存在就再次补充普通奖品
+	 * @param prizeIds
+	 * @param hide
+	 * @param prizeInventory
+	 */
+	private  List<Inventory> checkSupplements(List<Long> prizeIds, List<PrizeInfoEntity> hide, List<Inventory> prizeInventory) {
+		if (CollectionUtils.isEmpty(hide))
+			return prizeInventory;
+
+		 var containsIds= hide.stream()
+				.map(PrizeInfoEntity::getId)
+				.collect(Collectors.toList());
+
+		 var contains = prizeIds.stream()
+				.filter(containsIds::contains)
+				.collect(Collectors.toList());
+
+		 if (CollectionUtils.isEmpty(contains))
+			 return prizeInventory;
+
+		for (int i = 0; i < contains.size(); i++) {
+
+			//当前库存
+			var currentInventory = prizeInventory
+					.stream()
+					.map(Inventory::getInventory)
+					.reduce(0, Integer::sum);
+
+
+			var prizeId = this. getaPrizeId(null, null, prizeInventory, currentInventory);
+
+			prizeInventory = prizeInventory
+					.stream()
+					.map(entry -> {
+						if (Objects.equals(entry.getPrizeId(), prizeId))
+							entry.setInventory(entry.getInventory() - 1);
+						return entry;
+					})
+					.collect(Collectors.toList());
+
+			prizeIds.add(prizeId);
+
+		}
+		return prizeInventory;
 
 	}
 
@@ -296,7 +350,7 @@ public class OrderServer {
 
 		Map<Long, BigDecimal> probability = new HashMap<>();
 
-		if (!CollectionUtils.isEmpty(hide)) {
+		if (!CollectionUtils.isEmpty(hide)&&!CollectionUtils.isEmpty(gradeEntityMap)) {
 
 			var hideMap = hide
 					.stream()
@@ -535,6 +589,74 @@ public class OrderServer {
 		var orderPrizeEntities = orderService.deductionInventory(logisticsOrder.getGoods());
 		logisticsOrderService.generateLogisticsOrder(logisticsOrder.getAddressId(), orderPrizeEntities, logisticsOrder.getWechatUserId());
 
+
+	}
+
+	public List<WechatOrderList> getPrizeInfo(Long wechatUserId) {
+
+		if (Objects.isNull(wechatUserId))
+			return Collections.emptyList();
+
+		var order = OrderEntity.builder().wechatUserId(wechatUserId).build();
+		var orderEntities = orderService.list(order);
+		if (CollectionUtils.isEmpty(orderEntities))
+			return List.of();
+
+		var orderPrizeEntities = orderService.findByWechatUserId(wechatUserId);
+
+
+		var topicIdIds = orderEntities
+				.stream()
+				.map(OrderEntity::getTopicId)
+				.distinct()
+				.collect(Collectors.toList());
+
+		var seriesTopicNameMap = seriesTopicService.findByIds(topicIdIds).stream()
+				.collect(Collectors.toMap(SeriesTopicEntity::getId, SeriesTopicEntity::getName));
+
+		var productIds = orderPrizeEntities.stream()
+				.map(OrderPrizeEntity::getProductId)
+				.distinct()
+				.collect(Collectors.toList());
+
+		var prizeInfoMap = prizeInfoService.findByIds(productIds)
+				.stream()
+				.collect(Collectors.toMap(PrizeInfoEntity::getId, Function.identity()));
+
+
+		Map<Long, Map<Long, List<OrderPrizeEntity>>> orderPrizeMap = orderPrizeEntities.stream()
+				.collect(Collectors.groupingBy(OrderPrizeEntity::getOrderId, Collectors.groupingBy(OrderPrizeEntity::getProductId)));
+
+		return orderEntities.stream()
+				.map(s ->
+						WechatOrderList
+								.builder()
+								.id(s.getId())
+								.topicId(s.getTopicId())
+								.seriesName(seriesTopicNameMap.get(s.getTopicId()))
+								.createTime(s.getCreateTime())
+								.status(s.getStatus())
+								.goods(
+										orderPrizeMap.getOrDefault(s.getId(), Map.of())
+												.entrySet()
+												.stream()
+												.map(s1 -> {
+													var prizeInfoEntity = prizeInfoMap.getOrDefault(s1.getKey(), PrizeInfoEntity.builder().build());
+
+													return PrizeInfoEntity.builder()
+															.id(prizeInfoEntity.getId())
+															.type(prizeInfoEntity.getType())
+															.prizeUrl(prizeInfoEntity.getPrizeUrl())
+															.prizeName(prizeInfoEntity.getPrizeName())
+															.inventory(CollectionUtils.isEmpty(s1.getValue()) ? 0 : s1.getValue().size())
+															.build();
+
+												}).collect(Collectors.toList())
+								)
+								.build()
+
+				)
+				.collect(Collectors.toList());
 
 	}
 }

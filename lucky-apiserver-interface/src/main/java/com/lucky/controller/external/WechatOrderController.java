@@ -9,10 +9,7 @@ import com.lucky.controller.external.vo.WechatOrderListVO;
 import com.lucky.domain.valueobject.BaseDataPage;
 import com.lucky.domain.valueobject.Order;
 import com.lucky.utils.ResponseFormat;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -68,10 +65,17 @@ public class WechatOrderController extends BaseController {
 	/**
 	 * 获取抽奖记录
 	 */
-	@PostMapping("/get-prize-info")
+	@GetMapping("/get-prize-info")
 	@ResponseFormat
-	public List<WechatOrderListVO> getPrizeInfo(@RequestBody OrderDTO dto) {
-		return null;
+	public List<WechatOrderListVO> getPrizeInfo(@RequestParam(required = false) Long wechatUserId) {
+
+		if (Objects.isNull(wechatUserId))
+			wechatUserId =this.getWechatUserId();
+		return orderServer.getPrizeInfo(wechatUserId)
+				.stream()
+				.map(WechatOrderListVO::toVO)
+				.collect(Collectors.toList());
+
 	}
 
 

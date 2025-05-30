@@ -34,7 +34,8 @@ public class OrderRepositoryImpl extends ServiceImpl<OrderMapper, OrderPO> imple
 				.eq(Objects.nonNull(entity.getWechatUserId()), OrderPO::getWechatUserId, entity.getWechatUserId())
 				.eq(Objects.nonNull(entity.getTopicId()), OrderPO::getTopicId, entity.getTopicId())
 				.eq(Objects.nonNull(entity.getSessionId()), OrderPO::getSessionId, entity.getSessionId())
-				.eq(Objects.nonNull(entity.getStatus()), OrderPO::getStatus, entity.getStatus());
+				.eq(Objects.nonNull(entity.getStatus()), OrderPO::getStatus, entity.getStatus())
+				.orderByDesc(OrderPO::getCreateTime);
 
 		return this.list(wrapper)
 				.stream()
@@ -91,6 +92,13 @@ public class OrderRepositoryImpl extends ServiceImpl<OrderMapper, OrderPO> imple
 				.map(OrderPO::getInstance)
 				.collect(Collectors.toList());
 		return this.saveBatch(orderPOS);
+
+	}
+
+	@Override
+	public void getByWechatUserId(Long wechatUserId) {
+
+
 
 	}
 }

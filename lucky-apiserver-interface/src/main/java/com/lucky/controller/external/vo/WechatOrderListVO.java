@@ -1,5 +1,7 @@
 package com.lucky.controller.external.vo;
 
+import cn.hutool.core.bean.BeanUtil;
+import com.lucky.domain.valueobject.WechatOrderList;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,6 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -20,10 +25,7 @@ public class WechatOrderListVO {
 	 * 系列名称
 	 */
 	private String seriesName;
-	/**
-	 * 场次编号
-	 */
-	private String sessionName;
+
 	/**
 	 * 时间
 	 */
@@ -39,4 +41,17 @@ public class WechatOrderListVO {
 	 * 商品信息
 	 */
 	private List<WechatPrizeInfoVO> goods;
+
+	public static WechatOrderListVO toVO(WechatOrderList wechatOrderList) {
+		if (Objects.isNull(wechatOrderList))
+			return null;
+		 var bean = BeanUtil.toBean(wechatOrderList, WechatOrderListVO.class);
+		var goods= wechatOrderList.getGoods()
+				 .stream()
+				 .map(WechatPrizeInfoVO::getInstance)
+				 .collect(Collectors.toList());
+		 bean.setGoods(goods);
+		 return bean;
+
+	}
 }

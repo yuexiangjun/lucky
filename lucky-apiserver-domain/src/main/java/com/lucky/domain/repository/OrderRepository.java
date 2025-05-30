@@ -15,4 +15,6 @@ public interface OrderRepository {
 	BaseDataPage<OrderEntity> page(OrderEntity entity, Integer page, Integer size);
 
 	Boolean saveBatch(List<OrderEntity> orderEntities);
+
+	void getByWechatUserId(Long wechatUserId);
 }
