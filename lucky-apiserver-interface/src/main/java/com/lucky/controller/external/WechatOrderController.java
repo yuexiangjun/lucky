@@ -63,7 +63,7 @@ public class WechatOrderController extends BaseController {
 	}
 
 	/**
-	 * 获取抽奖记录
+	 * star 福禄
 	 */
 	@GetMapping("/get-prize-info")
 	@ResponseFormat
