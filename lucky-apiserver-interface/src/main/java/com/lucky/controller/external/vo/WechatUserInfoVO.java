@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Data
@@ -35,6 +36,10 @@ public class WechatUserInfoVO {
 	 * 不加区号的手机号码
 	 */
 	private String phone;
+	/**
+	 * 账户余额
+	 */
+	private BigDecimal balance;
 	public static WechatUserInfoVO toEntity(WechatUserEntity entity) {
 		if (Objects.isNull(entity))
 			throw BusinessException.newInstance("参数缺失");
@@ -43,6 +48,7 @@ public class WechatUserInfoVO {
 				.nickName(Objects.isNull(entity.getName())? entity.getPhone() : entity.getName())
 				.avatarUrl(entity.getAvatar())
 				.openId(entity.getOpenid())
+				.balance(entity.getBalance())
 				.phone(entity.getPhone())
 				.build();
 
