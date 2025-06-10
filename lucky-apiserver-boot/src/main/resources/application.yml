@@ -26,12 +26,12 @@ huawei:
   BASEURL1: https://lucky-wxcd.obs.cn-east-3.myhuaweicloud.com/
 wx:
   pay:
-    appid:
-    machid:
-    mchserialno:
-    appsecret:
-    apikey:
+    appid: wxd827da4ada3486fd
+    machid: 1719160947
+    mchserialno:  55B81111D0E04C5F96504101EF000BAB18645575
+    appsecret: bc2d8696bf75e4d2c077a74499018813
+    apikey: Fuxing1719160947Fuxing1719160947
     notifyurl: "/wechat/pay/callback"
-    keypath:
+    keypath: lucky-apiserver-boot/src/main/resources/apiclient_key.pem
     notifyhost:
 
