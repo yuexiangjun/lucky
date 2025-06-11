@@ -33,5 +33,5 @@ wx:
     apikey: Fuxing1719160947Fuxing1719160947
     notifyurl: "/wechat/pay/callback"
     keypath: lucky-apiserver-boot/src/main/resources/apiclient_key.pem
-    notifyhost:
+    notifyhost: https://253aca0a.r32.cpolar.top
 

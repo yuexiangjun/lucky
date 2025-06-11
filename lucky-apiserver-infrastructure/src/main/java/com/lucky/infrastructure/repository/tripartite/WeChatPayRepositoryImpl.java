@@ -46,7 +46,7 @@ public class WeChatPayRepositoryImpl implements WeChatPayRepository {
         request.setAmount(amount);
         request.setAppid(payInfoConfig.getAppid());
         Payer payer = new Payer();
-        payer.setOpenid(payInfoConfig.getAppid());
+        payer.setOpenid(payOrderPram.getOpenId());
         request.setPayer(payer);
         request.setMchid(payInfoConfig.getMachid());
         request.setDescription(payOrderPram.getPayDesc());
